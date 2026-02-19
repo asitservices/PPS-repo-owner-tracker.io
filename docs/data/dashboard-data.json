@@ -3,37 +3,51 @@
     {
       "name": "AS-ASK-IT",
       "totalRepos": 21,
-      "lastUpdated": "2026-02-19T15:22:38.583Z"
+      "maintainedRepos": 3,
+      "ownershipPercentage": 14,
+      "lastUpdated": "2026-02-19T15:56:00.541Z"
     },
     {
       "name": "as-cloud-services",
       "totalRepos": 136,
-      "lastUpdated": "2026-02-19T15:22:41.043Z"
+      "maintainedRepos": 131,
+      "ownershipPercentage": 96,
+      "lastUpdated": "2026-02-19T15:56:02.400Z"
     },
     {
       "name": "asitservices",
       "totalRepos": 853,
-      "lastUpdated": "2026-02-19T15:22:54.324Z"
+      "maintainedRepos": 383,
+      "ownershipPercentage": 45,
+      "lastUpdated": "2026-02-19T15:56:15.630Z"
     },
     {
       "name": "axelspringer",
       "totalRepos": 144,
-      "lastUpdated": "2026-02-19T15:22:56.573Z"
+      "maintainedRepos": 70,
+      "ownershipPercentage": 49,
+      "lastUpdated": "2026-02-19T15:56:17.780Z"
     },
     {
       "name": "Media-Impact",
       "totalRepos": 26,
-      "lastUpdated": "2026-02-19T15:22:57.180Z"
+      "maintainedRepos": 6,
+      "ownershipPercentage": 23,
+      "lastUpdated": "2026-02-19T15:56:18.453Z"
     },
     {
       "name": "spring-media",
       "totalRepos": 3157,
-      "lastUpdated": "2026-02-19T15:23:52.068Z"
+      "maintainedRepos": 1667,
+      "ownershipPercentage": 53,
+      "lastUpdated": "2026-02-19T15:57:01.781Z"
     },
     {
       "name": "welttv",
       "totalRepos": 51,
-      "lastUpdated": "2026-02-19T15:23:53.310Z"
+      "maintainedRepos": 41,
+      "ownershipPercentage": 80,
+      "lastUpdated": "2026-02-19T15:57:02.640Z"
     }
   ],
   "trends": [
@@ -101,6 +115,16 @@
       "Media-Impact": 26,
       "spring-media": 3157,
       "welttv": 51
+    },
+    {
+      "date": "2026-02-19",
+      "AS-ASK-IT": 14,
+      "as-cloud-services": 96,
+      "asitservices": 45,
+      "axelspringer": 49,
+      "Media-Impact": 23,
+      "spring-media": 53,
+      "welttv": 80
     }
   ]
 }
