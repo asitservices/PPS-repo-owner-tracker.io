@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Repository Owner Tracker</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0d1117; color: #c9d1d9; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
+        h1 { margin-bottom: 30px; color: #58a6ff; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        .card { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 20px; }
+        .card h2 { color: #58a6ff; margin-bottom: 10px; }
+        .stat { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #30363d; }
+        .stat:last-child { border-bottom: none; }
+        .label { color: #8b949e; }
+        .value { font-weight: bold; color: #58a6ff; }
+        .error { color: #f85149; }
+        .loading { text-align: center; padding: 40px; color: #8b949e; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 Repository Owner Tracker</h1>
+        <div id="content" class="loading">Loading data...</div>
+    </div>
+
+    <script>
+        async function loadData() {
+            try {
+                const response = await fetch('./data/dashboard-data.json');
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                
+                const data = await response.json();
+                const organizations = data.organizations || [];
+                
+                if (organizations.length === 0) {
+                    document.getElementById('content').innerHTML = '<p class="error">No data available yet. Check back later!</p>';
+                    return;
+                }
+
+                let html = '<div class="grid">';
+                organizations.forEach(org => {
+                    html += `
+                        <div class="card">
+                            <h2>${org.name}</h2>
+                            <div class="stat">
+                                <span class="label">Total Repos:</span>
+                                <span class="value">${org.totalRepos || 0}</span>
+                            </div>
+                            <div class="stat">
+                                <span class="label">Assigned:</span>
+                                <span class="value">${org.assignedRepos || 0}</span>
+                            </div>
+                            <div class="stat">
+                                <span class="label">Coverage:</span>
+                                <span class="value">${(org.percentage || 0).toFixed(1)}%</span>
+                            </div>
+                            <div class="stat">
+                                <span class="label">Updated:</span>
+                                <span class="value">${new Date(org.lastUpdated).toLocaleDateString()}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+                
+                document.getElementById('content').innerHTML = html;
+            } catch (error) {
+                document.getElementById('content').innerHTML = `<p class="error">Error loading data: ${error.message}</p>`;
+            }
+        }
+
+        loadData();
+    </script>
+</body>
+</html>
