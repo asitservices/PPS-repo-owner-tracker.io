@@ -20,8 +20,8 @@ jobs:
           GH_PAT: ${{ secrets.GH_PAT }}
       
       - run: |
-          git config user.name "GitHub Actions"
-          git config user.email "actions@github.com"
+          git config user.name "bot"
+          git config user.email "bot@github.com"
           git add docs/data/dashboard-data.json
-          git commit -m "Update data" || true
-          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:main
+          git commit -m "auto: update data" || true
+          git push origin main
