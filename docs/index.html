@@ -21,6 +21,7 @@
         .percentage-fill { height: 100%; background: linear-gradient(90deg, #58a6ff, #79c0ff); transition: width 0.3s; }
         .charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 30px; margin-bottom: 40px; }
         .chart-container { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 20px; }
+        .chart-container.full { grid-column: 1 / -1; }
         .chart-container h3 { color: #58a6ff; margin-bottom: 20px; }
         .error { color: #f85149; text-align: center; padding: 40px; }
         .loading { text-align: center; padding: 40px; color: #8b949e; }
@@ -33,8 +34,12 @@
         <div id="content" class="loading">Loading data...</div>
 
         <div id="charts" class="charts" style="display: none;">
+            <div class="chart-container full">
+                <h3>📈 Coverage Trend Over Time</h3>
+                <canvas id="lineChart"></canvas>
+            </div>
             <div class="chart-container">
-                <h3>📈 Coverage by Organization</h3>
+                <h3>📊 Coverage by Organization</h3>
                 <canvas id="barChart"></canvas>
             </div>
             <div class="chart-container">
@@ -45,7 +50,7 @@
     </div>
 
     <script>
-        let barChart, pieChart;
+        let lineChart, barChart, pieChart;
 
         async function loadData() {
             try {
@@ -94,14 +99,52 @@
 
                 // Charts
                 document.getElementById('charts').style.display = 'grid';
-                createCharts(organizations);
+                createCharts(organizations, data.trends || []);
 
             } catch (error) {
                 document.getElementById('content').innerHTML = `<p class="error">Error loading data: ${error.message}</p>`;
             }
         }
 
-        function createCharts(organizations) {
+        function createCharts(organizations, trends) {
+            // Line Chart
+            const lineCtx = document.getElementById('lineChart').getContext('2d');
+            const lineDatasets = organizations.map((org, idx) => {
+                const colors = ['#58a6ff', '#79c0ff', '#a371f7', '#d29922', '#3fb950', '#f85149', '#e1e4e8', '#6e40aa'];
+                return {
+                    label: org.name,
+                    data: trends.map(t => t[org.name] || 0),
+                    borderColor: colors[idx % colors.length],
+                    backgroundColor: colors[idx % colors.length] + '20',
+                    tension: 0.4,
+                    fill: false,
+                    borderWidth: 2
+                };
+            });
+
+            lineChart = new Chart(lineCtx, {
+                type: 'line',
+                data: {
+                    labels: trends.map(t => new Date(t.date).toLocaleDateString()),
+                    datasets: lineDatasets
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { labels: { color: '#c9d1d9' } }
+                    },
+                    scales: {
+                        y: { 
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: { color: '#8b949e' },
+                            grid: { color: '#30363d' }
+                        },
+                        x: { ticks: { color: '#8b949e' }, grid: { color: '#30363d' } }
+                    }
+                }
+            });
+
             // Bar Chart
             const barCtx = document.getElementById('barChart').getContext('2d');
             barChart = new Chart(barCtx, {
