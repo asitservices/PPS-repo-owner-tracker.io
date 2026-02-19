@@ -20,42 +20,38 @@ function makeRequest(url) {
       res.on('end', () => {
         if (res.statusCode === 200) {
           try {
-            resolve(JSON.parse(data));
+            resolve({ success: true, data: JSON.parse(data) });
           } catch {
-            resolve([]);
+            resolve({ success: true, data: [] });
           }
         } else {
-          console.log(`❌ Status ${res.statusCode}: ${url}`);
-          resolve([]);
+          resolve({ success: false, data: [] });
         }
       });
-    }).on('error', reject);
+    }).on('error', () => resolve({ success: false, data: [] }));
   });
 }
 
 async function getOrgRepos(org) {
-  console.log(`\n📦 Fetching repos for: ${org}`);
+  console.log(`📦 ${org}`);
   
   let allRepos = [];
   let page = 1;
-  let hasMore = true;
 
-  while (hasMore) {
+  while (true) {
     const url = `https://api.github.com/orgs/${org}/repos?per_page=100&page=${page}&type=all`;
-    const repos = await makeRequest(url);
+    const result = await makeRequest(url);
     
-    if (Array.isArray(repos) && repos.length > 0) {
-      allRepos = allRepos.concat(repos);
-      console.log(`  Page ${page}: ${repos.length} repos (total: ${allRepos.length})`);
-      page++;
-      hasMore = repos.length === 100;
-    } else {
-      hasMore = false;
+    if (!result.success || !Array.isArray(result.data) || result.data.length === 0) {
+      break;
     }
+    
+    allRepos = allRepos.concat(result.data);
+    if (result.data.length < 100) break;
+    page++;
   }
 
-  console.log(`  ✅ Total repos for ${org}: ${allRepos.length}`);
-  return allRepos;
+  return allRepos.length;
 }
 
 async function collectData() {
@@ -65,7 +61,6 @@ async function collectData() {
     'asitservices',
     'axelspringer',
     'Media-Impact',
-    'sales-impact',
     'spring-media',
     'welttv'
   ];
@@ -75,30 +70,25 @@ async function collectData() {
 
   for (const org of ORGS) {
     try {
-      const repos = await getOrgRepos(org);
-      const totalRepos = repos.length;
-      
-      const assignedRepos = repos.filter(r => r.description && r.description.includes('owner')).length;
-      const percentage = totalRepos > 0 ? (assignedRepos / totalRepos * 100) : 0;
+      const totalRepos = await getOrgRepos(org);
       
       organizations.push({
         name: org,
         totalRepos: totalRepos,
-        assignedRepos: assignedRepos || Math.floor(totalRepos / 2),
-        percentage: percentage,
         lastUpdated: new Date().toISOString()
       });
 
-      trendEntry[org] = percentage;
+      console.log(`  ✅ ${org}: ${totalRepos} repos\n`);
+      trendEntry[org] = totalRepos;
     } catch (error) {
-      console.error(`❌ Error processing ${org}:`, error.message);
+      console.error(`❌ ${org}: ${error.message}`);
+      trendEntry[org] = 0;
     }
   }
 
   const dataDir = path.join(__dirname, '../docs/data');
   if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
   
-  // Alte Trends laden und neue hinzufügen
   let trends = [];
   const dataFile = path.join(dataDir, 'dashboard-data.json');
   if (fs.existsSync(dataFile)) {
@@ -110,16 +100,15 @@ async function collectData() {
     }
   }
 
-  // Neue Trend hinzufügen (max 30 Tage)
   trends.push(trendEntry);
-  if (trends.length > 30) trends = trends.slice(-30);
+  if (trends.length > 90) trends = trends.slice(-90);
   
   fs.writeFileSync(
     dataFile,
     JSON.stringify({ organizations, trends }, null, 2)
   );
 
-  console.log('\n✅ Data saved to docs/data/dashboard-data.json');
+  console.log('✅ Data saved!');
 }
 
 collectData().catch(console.error);
