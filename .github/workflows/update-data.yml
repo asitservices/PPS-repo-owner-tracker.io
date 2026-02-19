@@ -1,0 +1,30 @@
+name: Update Dashboard Data
+
+on:
+  schedule:
+    - cron: '0 9 * * *'
+  workflow_dispatch:
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      
+      - name: Run data collection
+        env:
+          GH_PAT: ${{ secrets.GH_PAT }}
+        run: node scripts/collect-data.js
+      
+      - name: Commit and push
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add docs/data/dashboard-data.json
+          git commit -m "chore: update dashboard data" || echo "No changes"
+          git push
