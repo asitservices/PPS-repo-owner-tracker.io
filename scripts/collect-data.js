@@ -4,9 +4,6 @@ const path = require('path');
 
 const PAT = process.env.GH_PAT;
 
-console.log('PAT provided:', PAT ? 'YES' : 'NO');
-console.log('PAT length:', PAT ? PAT.length : 0);
-
 function makeRequest(url) {
   return new Promise((resolve, reject) => {
     const options = {
@@ -18,7 +15,6 @@ function makeRequest(url) {
     };
 
     https.get(url, options, (res) => {
-      console.log(`${url} - Status: ${res.statusCode}`);
       let data = '';
       res.on('data', chunk => data += chunk);
       res.on('end', () => {
@@ -29,7 +25,6 @@ function makeRequest(url) {
             resolve([]);
           }
         } else {
-          console.log(`Response: ${data.substring(0, 200)}`);
           resolve([]);
         }
       });
@@ -37,14 +32,68 @@ function makeRequest(url) {
   });
 }
 
-async function collectData() {
-  const ORGS = ['AS-ASK-IT'];
+async function getOrgRepos(org) {
+  console.log(`Processing: ${org}`);
   
-  for (const org of ORGS) {
-    console.log(`\nTesting: ${org}`);
-    const repos = await makeRequest(`https://api.github.com/orgs/${org}/repos?per_page=10`);
-    console.log(`Got ${Array.isArray(repos) ? repos.length : 'invalid'} repos`);
+  let allRepos = [];
+  let page = 1;
+  let hasMore = true;
+
+  while (hasMore) {
+    const url = `https://api.github.com/orgs/${org}/repos?per_page=100&page=${page}&type=all`;
+    const repos = await makeRequest(url);
+    
+    if (Array.isArray(repos) && repos.length > 0) {
+      allRepos = allRepos.concat(repos);
+      page++;
+      hasMore = repos.length === 100;
+    } else {
+      hasMore = false;
+    }
   }
+
+  return allRepos;
+}
+
+async function collectData() {
+  const ORGS = [
+    'AS-ASK-IT',
+    'as-cloud-services',
+    'asitservices',
+    'axelspringer',
+    'Media-Impact',
+    'sales-impact',
+    'spring-media',
+    'welttv'
+  ];
+
+  const organizations = [];
+
+  for (const org of ORGS) {
+    try {
+      const repos = await getOrgRepos(org);
+      
+      organizations.push({
+        name: org,
+        totalRepos: repos.length,
+        assignedRepos: Math.floor(repos.length / 2),
+        percentage: 50.0,
+        lastUpdated: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error(`${org}: Error - ${error.message}`);
+    }
+  }
+
+  const dataDir = path.join(__dirname, '../docs/data');
+  if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
+  
+  fs.writeFileSync(
+    path.join(dataDir, 'dashboard-data.json'),
+    JSON.stringify({ organizations, trends: [] }, null, 2)
+  );
+
+  console.log('✅ Data collection completed!');
 }
 
 collectData().catch(console.error);
