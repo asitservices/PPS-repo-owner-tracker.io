@@ -4,57 +4,57 @@
       "name": "AS-ASK-IT",
       "totalRepos": 21,
       "assignedRepos": 10,
-      "percentage": 50,
-      "lastUpdated": "2026-02-19T10:22:40.372Z"
+      "percentage": 0,
+      "lastUpdated": "2026-02-19T10:33:03.163Z"
     },
     {
       "name": "as-cloud-services",
       "totalRepos": 136,
       "assignedRepos": 68,
-      "percentage": 50,
-      "lastUpdated": "2026-02-19T10:22:44.061Z"
+      "percentage": 0,
+      "lastUpdated": "2026-02-19T10:33:06.305Z"
     },
     {
       "name": "asitservices",
       "totalRepos": 852,
       "assignedRepos": 426,
-      "percentage": 50,
-      "lastUpdated": "2026-02-19T10:23:08.931Z"
+      "percentage": 0,
+      "lastUpdated": "2026-02-19T10:33:23.654Z"
     },
     {
       "name": "axelspringer",
       "totalRepos": 144,
       "assignedRepos": 72,
-      "percentage": 50,
-      "lastUpdated": "2026-02-19T10:23:14.652Z"
+      "percentage": 0,
+      "lastUpdated": "2026-02-19T10:33:26.098Z"
     },
     {
       "name": "Media-Impact",
       "totalRepos": 26,
       "assignedRepos": 13,
-      "percentage": 50,
-      "lastUpdated": "2026-02-19T10:23:15.787Z"
+      "percentage": 0,
+      "lastUpdated": "2026-02-19T10:33:26.960Z"
     },
     {
       "name": "sales-impact",
       "totalRepos": 0,
       "assignedRepos": 0,
-      "percentage": 50,
-      "lastUpdated": "2026-02-19T10:23:16.002Z"
+      "percentage": 0,
+      "lastUpdated": "2026-02-19T10:33:27.066Z"
     },
     {
       "name": "spring-media",
       "totalRepos": 3157,
-      "assignedRepos": 1578,
-      "percentage": 50,
-      "lastUpdated": "2026-02-19T10:24:31.373Z"
+      "assignedRepos": 1,
+      "percentage": 0.031675641431738996,
+      "lastUpdated": "2026-02-19T10:34:21.419Z"
     },
     {
       "name": "welttv",
       "totalRepos": 51,
       "assignedRepos": 25,
-      "percentage": 50,
-      "lastUpdated": "2026-02-19T10:24:33.019Z"
+      "percentage": 0,
+      "lastUpdated": "2026-02-19T10:34:22.188Z"
     }
   ],
   "trends": []
