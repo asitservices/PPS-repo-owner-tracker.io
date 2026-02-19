@@ -51,7 +51,12 @@ async function getOrgRepos(org) {
     page++;
   }
 
-  return allRepos.length;
+  // Count repos with description (= maintained)
+  const maintainedRepos = allRepos.filter(r => r.description && r.description.trim().length > 0).length;
+  const totalRepos = allRepos.length;
+  const percentage = totalRepos > 0 ? Math.round((maintainedRepos / totalRepos) * 100) : 0;
+
+  return { totalRepos, maintainedRepos, percentage };
 }
 
 async function collectData() {
@@ -70,16 +75,18 @@ async function collectData() {
 
   for (const org of ORGS) {
     try {
-      const totalRepos = await getOrgRepos(org);
+      const { totalRepos, maintainedRepos, percentage } = await getOrgRepos(org);
       
       organizations.push({
         name: org,
         totalRepos: totalRepos,
+        maintainedRepos: maintainedRepos,
+        ownershipPercentage: percentage,
         lastUpdated: new Date().toISOString()
       });
 
-      console.log(`  ✅ ${org}: ${totalRepos} repos\n`);
-      trendEntry[org] = totalRepos;
+      console.log(`  ✅ ${org}: ${totalRepos} repos, ${percentage}% maintained\n`);
+      trendEntry[org] = percentage;
     } catch (error) {
       console.error(`❌ ${org}: ${error.message}`);
       trendEntry[org] = 0;
