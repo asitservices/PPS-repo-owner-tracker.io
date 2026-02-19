@@ -15,12 +15,59 @@
       "lastUpdated": "2026-02-19T00:00:00.000Z"
     },
     {
+      "name": "asitservices",
+      "totalRepos": 28,
+      "assignedRepos": 14,
+      "percentage": 50.0,
+      "lastUpdated": "2026-02-19T00:00:00.000Z"
+    },
+    {
       "name": "axelspringer",
       "totalRepos": 128,
       "assignedRepos": 64,
       "percentage": 50.0,
       "lastUpdated": "2026-02-19T00:00:00.000Z"
+    },
+    {
+      "name": "Media-Impact",
+      "totalRepos": 56,
+      "assignedRepos": 28,
+      "percentage": 50.0,
+      "lastUpdated": "2026-02-19T00:00:00.000Z"
+    },
+    {
+      "name": "sales-impact",
+      "totalRepos": 19,
+      "assignedRepos": 9,
+      "percentage": 47.4,
+      "lastUpdated": "2026-02-19T00:00:00.000Z"
+    },
+    {
+      "name": "spring-media",
+      "totalRepos": 89,
+      "assignedRepos": 44,
+      "percentage": 49.4,
+      "lastUpdated": "2026-02-19T00:00:00.000Z"
+    },
+    {
+      "name": "welttv",
+      "totalRepos": 15,
+      "assignedRepos": 7,
+      "percentage": 46.7,
+      "lastUpdated": "2026-02-19T00:00:00.000Z"
     }
   ],
-  "trends": []
+  "trends": [
+    {
+      "date": "2026-02-19",
+      "AS-ASK-IT": 48.9,
+      "as-cloud-services": 50.0,
+      "asitservices": 50.0,
+      "axelspringer": 50.0,
+      "Media-Impact": 50.0,
+      "sales-impact": 47.4,
+      "spring-media": 49.4,
+      "welttv": 46.7
+    }
+  ]
 }
