@@ -53,11 +53,14 @@ async function getOrgRepos(org) {
     page++;
   }
 
-  // Count repos mit description
-  const activeRepos = allRepos.filter(r => r.description && r.description.trim().length > 0).length;
+  // Exclude archived and internal repos
+  const filteredRepos = allRepos.filter(r => !r.archived && r.visibility !== 'internal');
 
-  console.log(`  ✅ ${org}: ${allRepos.length} total, ${activeRepos} aktiv gepflegt\n`);
-  return { totalRepos: allRepos.length, activeRepos: activeRepos };
+  // Count repos mit description
+  const activeRepos = filteredRepos.filter(r => r.description && r.description.trim().length > 0).length;
+
+  console.log(`  ✅ ${org}: ${filteredRepos.length} total (ohne internal/archiv), ${activeRepos} aktiv gepflegt\n`);
+  return { totalRepos: filteredRepos.length, activeRepos: activeRepos };
 }
 
 async function collectData() {
