@@ -2,45 +2,45 @@
   "organizations": [
     {
       "name": "AS-ASK-IT",
-      "totalRepos": 21,
-      "activeRepos": 3,
-      "lastUpdated": "2026-02-20T10:28:45.163Z"
+      "totalRepos": 20,
+      "activeRepos": 2,
+      "lastUpdated": "2026-02-20T12:06:19.647Z"
     },
     {
       "name": "as-cloud-services",
-      "totalRepos": 136,
-      "activeRepos": 131,
-      "lastUpdated": "2026-02-20T10:28:47.671Z"
+      "totalRepos": 131,
+      "activeRepos": 130,
+      "lastUpdated": "2026-02-20T12:06:21.934Z"
     },
     {
       "name": "asitservices",
-      "totalRepos": 840,
-      "activeRepos": 376,
-      "lastUpdated": "2026-02-20T10:29:01.864Z"
+      "totalRepos": 320,
+      "activeRepos": 125,
+      "lastUpdated": "2026-02-20T12:06:40.690Z"
     },
     {
       "name": "axelspringer",
-      "totalRepos": 144,
-      "activeRepos": 70,
-      "lastUpdated": "2026-02-20T10:29:04.393Z"
+      "totalRepos": 44,
+      "activeRepos": 14,
+      "lastUpdated": "2026-02-20T12:06:44.349Z"
     },
     {
       "name": "Media-Impact",
-      "totalRepos": 26,
-      "activeRepos": 6,
-      "lastUpdated": "2026-02-20T10:29:05.210Z"
+      "totalRepos": 1,
+      "activeRepos": 0,
+      "lastUpdated": "2026-02-20T12:06:45.099Z"
     },
     {
       "name": "spring-media",
-      "totalRepos": 3157,
-      "activeRepos": 1667,
-      "lastUpdated": "2026-02-20T10:29:55.846Z"
+      "totalRepos": 374,
+      "activeRepos": 264,
+      "lastUpdated": "2026-02-20T12:07:33.822Z"
     },
     {
       "name": "welttv",
-      "totalRepos": 51,
-      "activeRepos": 41,
-      "lastUpdated": "2026-02-20T10:29:56.603Z"
+      "totalRepos": 2,
+      "activeRepos": 0,
+      "lastUpdated": "2026-02-20T12:07:34.720Z"
     }
   ],
   "trends": [
@@ -168,6 +168,16 @@
       "Media-Impact": 26,
       "spring-media": 3157,
       "welttv": 51
+    },
+    {
+      "date": "2026-02-20",
+      "AS-ASK-IT": 20,
+      "as-cloud-services": 131,
+      "asitservices": 320,
+      "axelspringer": 44,
+      "Media-Impact": 1,
+      "spring-media": 374,
+      "welttv": 2
     }
   ]
 }
