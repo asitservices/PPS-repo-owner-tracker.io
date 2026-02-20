@@ -1,3 +1,17 @@
+/**
+ * Repo Owner Tracker
+ * - totalRepos: all repos in org (type=all), excluding archived
+ * - activeRepos: RepoOwner custom property is NOT empty and NOT "Default..." (default-like)
+ *
+ * Features:
+ * - Handles GitHub REST core rate limit by waiting until reset and retrying
+ * - Uses a local cache to avoid re-fetching RepoOwner for every repo on every run
+ *
+ * Env:
+ * - GH_PAT (required for private/internal repos + custom properties)
+ * - DEBUG_REPOOWNER=1 (optional: prints repoOwner extraction for refreshed repos)
+ */
+
 const https = require('https');
 const fs = require('fs');
 const path = require('path');
@@ -15,13 +29,13 @@ const ORGS = [
 const PAT = process.env.GH_PAT;
 const DEBUG_REPOOWNER = process.env.DEBUG_REPOOWNER === '1';
 
-// ---- helpers ----
+// ---------- small utils ----------
 function sleep(ms) {
   return new Promise(r => setTimeout(r, ms));
 }
 
-function ensureDataDir(p) {
-  if (!fs.existsSync(p)) fs.mkdirSync(p, { recursive: true });
+function ensureDir(dirPath) {
+  if (!fs.existsSync(dirPath)) fs.mkdirSync(dirPath, { recursive: true });
 }
 
 function safeJsonRead(filePath, fallback) {
@@ -37,53 +51,70 @@ function safeJsonWrite(filePath, obj) {
   fs.writeFileSync(filePath, JSON.stringify(obj, null, 2));
 }
 
-function extractRepoOwnerString(raw) {
-  if (raw == null) return '';
+function isoDateOnly(iso) {
+  return String(iso).split('T')[0];
+}
 
+// ---------- RepoOwner parsing / active logic ----------
+function toLowerTrim(s) {
+  return String(s ?? '').trim().toLowerCase();
+}
+
+/**
+ * Convert RepoOwner raw value into a list of strings.
+ * We avoid deep-searching arbitrary object keys to prevent false matches.
+ */
+function repoOwnerToList(raw) {
+  if (raw == null) return [];
+
+  // scalar
   if (typeof raw === 'string' || typeof raw === 'number' || typeof raw === 'boolean') {
-    return String(raw).trim();
+    const v = String(raw).trim();
+    return v ? [v] : [];
   }
 
+  // array
   if (Array.isArray(raw)) {
-    return raw.map(extractRepoOwnerString).filter(Boolean).join(',').trim();
+    return raw.flatMap(repoOwnerToList).map(v => String(v).trim()).filter(Boolean);
   }
 
+  // object (select-like)
   if (typeof raw === 'object') {
-    const candidates = [
-      raw.name,
-      raw.value,
-      raw.label,
-      raw.display_name,
-      raw.displayName,
-      raw.login
-    ];
-
-    for (const c of candidates) {
-      const s = extractRepoOwnerString(c);
-      if (s) return s;
+    const fields = [raw.value, raw.name, raw.label, raw.display_name, raw.displayName];
+    for (const f of fields) {
+      const list = repoOwnerToList(f);
+      if (list.length) return list;
     }
-
-    for (const k of Object.keys(raw)) {
-      const v = raw[k];
-      if (typeof v === 'string' && v.trim()) return v.trim();
-      if (v && typeof v === 'object') {
-        const s = extractRepoOwnerString(v);
-        if (s) return s;
-      }
-    }
+    return [];
   }
 
-  return '';
+  return [];
 }
 
+/**
+ * Treat values as "default-like" if they are empty or start with "default"
+ * (e.g. "Default (Please choose ...)" from UI).
+ */
+function isDefaultLike(v) {
+  const s = toLowerTrim(v);
+  if (!s) return true;
+  if (s === 'default') return true;
+  if (s.startsWith('default')) return true;
+  return false;
+}
+
+/**
+ * Active if there exists at least one non-default-like value.
+ * - empty / missing / "Default ..." => NOT active
+ * - anything else => active
+ */
 function isActiveByRepoOwner(rawRepoOwnerValue) {
-  const v = extractRepoOwnerString(rawRepoOwnerValue).trim();
-  if (!v) return false;
-  if (v.toLowerCase() === 'default') return false;
-  return true;
+  const values = repoOwnerToList(rawRepoOwnerValue).map(v => String(v).trim()).filter(Boolean);
+  if (values.length === 0) return false;
+  return values.some(v => !isDefaultLike(v));
 }
 
-// ---- HTTP with rate-limit handling ----
+// ---------- HTTP with rate-limit handling ----------
 function makeRequest(url) {
   return new Promise((resolve) => {
     const headers = {
@@ -134,7 +165,7 @@ async function makeRequestWithRateLimitHandling(url) {
   return await makeRequest(url);
 }
 
-// ---- concurrency ----
+// ---------- concurrency ----------
 async function mapWithConcurrency(items, limit, mapper) {
   const results = new Array(items.length);
   let idx = 0;
@@ -152,7 +183,7 @@ async function mapWithConcurrency(items, limit, mapper) {
   return results;
 }
 
-// ---- GitHub logic ----
+// ---------- GitHub REST logic ----------
 async function listOrgRepos(org) {
   let allRepos = [];
   let page = 1;
@@ -175,7 +206,6 @@ async function listOrgRepos(org) {
     page++;
   }
 
-  // total = all visibilities, exclude archived
   return allRepos.filter(r => !r.archived);
 }
 
@@ -183,6 +213,7 @@ async function getRepoOwnerCustomProperty(org, repo) {
   const url = `https://api.github.com/repos/${org}/${repo}/properties/values`;
   const result = await makeRequestWithRateLimitHandling(url);
 
+  // If we can't read properties, treat as "not active" by setting ok=false.
   if (!result.success || !result.data) return { ok: false, value: null, status: result.status };
 
   if (Array.isArray(result.data)) {
@@ -191,8 +222,10 @@ async function getRepoOwnerCustomProperty(org, repo) {
       p.propertyName === 'RepoOwner' ||
       p.name === 'RepoOwner'
     );
+
     if (!hit) return { ok: true, value: null, status: result.status };
 
+    // return ONLY the property value field (no guessing!)
     if ('value' in hit) return { ok: true, value: hit.value, status: result.status };
     if ('string_value' in hit) return { ok: true, value: hit.string_value, status: result.status };
     if ('selected_value' in hit) return { ok: true, value: hit.selected_value, status: result.status };
@@ -201,79 +234,76 @@ async function getRepoOwnerCustomProperty(org, repo) {
     return { ok: true, value: null, status: result.status };
   }
 
-  if (typeof result.data === 'object' && result.data !== null) {
-    if ('RepoOwner' in result.data) return { ok: true, value: result.data.RepoOwner, status: result.status };
-  }
-
   return { ok: true, value: null, status: result.status };
 }
 
-// ---- caching to avoid burning 5000 requests every run ----
+// ---------- caching ----------
 function cacheKey(org, repo) {
   return `${org}/${repo}`;
 }
 
 async function collectData() {
+  if (!PAT || !String(PAT).trim()) {
+    console.error('❌ GH_PAT is not set. Please set GH_PAT (required for private/internal repos and custom properties).');
+    process.exit(1);
+  }
+
   const nowIso = new Date().toISOString();
 
   const dataDir = path.join(__dirname, '../docs/data');
-  ensureDataDir(dataDir);
+  ensureDir(dataDir);
 
   const dashboardFile = path.join(dataDir, 'dashboard-data.json');
   const cacheFile = path.join(dataDir, 'repoowner-cache.json');
 
-  // Cache shape:
-  // {
-  //   "org/repo": { "updated_at": "...", "repoOwnerRaw": <any>, "repoOwnerExtracted": "...", "active": true/false, "cached_at": "..." }
-  // }
+  // cache: { "org/repo": { updated_at, repoOwnerRaw, repoOwnerList, active, cached_at } }
   const repoOwnerCache = safeJsonRead(cacheFile, {});
 
   const organizations = [];
-  const trendEntry = { date: nowIso.split('T')[0] };
+  const trendEntry = { date: isoDateOnly(nowIso) };
 
   for (const org of ORGS) {
     console.log(`📦 ${org}`);
 
     const repos = await listOrgRepos(org);
 
-    // Decide which repos need property refresh:
+    // refresh cache only when repo updated_at changed or missing cache
     const toRefresh = repos.filter(r => {
       const key = cacheKey(org, r.name);
       const cached = repoOwnerCache[key];
-      // refresh if not cached or repo updated_at changed
       return !cached || cached.updated_at !== r.updated_at;
     });
 
-    // Lower concurrency to avoid bursts (still can be many, but cache keeps it small later)
-    const refreshed = await mapWithConcurrency(toRefresh, 2, async (r) => {
+    console.log(`  🔄 Refresh RepoOwner for ${toRefresh.length}/${repos.length} repos (cache-aware)`);
+
+    await mapWithConcurrency(toRefresh, 2, async (r) => {
       const { ok, value, status } = await getRepoOwnerCustomProperty(org, r.name);
 
-      const extracted = extractRepoOwnerString(value);
+      const list = repoOwnerToList(value);
       const active = ok && isActiveByRepoOwner(value);
 
       if (DEBUG_REPOOWNER) {
-        console.log(`  🔎 ${org}/${r.name} updated_at=${r.updated_at} propsStatus=${status} extracted="${extracted}" active=${active}`);
+        console.log(
+          `  🔎 ${org}/${r.name} updated_at=${r.updated_at} propsStatus=${status} list=${JSON.stringify(list)} active=${active}`
+        );
       }
 
       repoOwnerCache[cacheKey(org, r.name)] = {
         updated_at: r.updated_at,
         repoOwnerRaw: value,
-        repoOwnerExtracted: extracted,
+        repoOwnerList: list,
         active,
+        ok,
         cached_at: nowIso
       };
-      return null;
     });
 
-    void refreshed; // just to silence linters if any
-
-    // total: all repos without archived
     const totalRepos = repos.length;
 
-    // active: based on cache (RepoOwner != default/empty AND properties readable)
+    // compute active from cache
     const activeRepos = repos.filter(r => {
       const cached = repoOwnerCache[cacheKey(org, r.name)];
-      return cached ? Boolean(cached.active) : false;
+      return cached ? Boolean(cached.ok && cached.active) : false;
     }).length;
 
     organizations.push({
@@ -285,18 +315,16 @@ async function collectData() {
 
     trendEntry[org] = totalRepos;
 
-    console.log(`  ✅ ${org}: ${totalRepos} total (ohne archiv), ${activeRepos} aktiv (RepoOwner != default/leer)\n`);
+    console.log(`  ✅ ${org}: ${totalRepos} total (ohne archiv), ${activeRepos} aktiv\n`);
   }
 
-  // Save dashboard trends
+  // dashboard trends (keep last 90)
   const existingDashboard = safeJsonRead(dashboardFile, { organizations: [], trends: [] });
   let trends = Array.isArray(existingDashboard.trends) ? existingDashboard.trends : [];
   trends.push(trendEntry);
   if (trends.length > 90) trends = trends.slice(-90);
 
   safeJsonWrite(dashboardFile, { organizations, trends });
-
-  // Save cache
   safeJsonWrite(cacheFile, repoOwnerCache);
 
   console.log('✅ Data saved!');
