@@ -1,5 +1,58 @@
 {
   "organizations": [
-    
+    {
+      "name": "AS-ASK-IT",
+      "totalRepos": 21,
+      "activeRepos": 3,
+      "lastUpdated": "2026-02-20T13:34:48.994Z"
+    },
+    {
+      "name": "as-cloud-services",
+      "totalRepos": 136,
+      "activeRepos": 131,
+      "lastUpdated": "2026-02-20T13:34:50.991Z"
+    },
+    {
+      "name": "asitservices",
+      "totalRepos": 813,
+      "activeRepos": 356,
+      "lastUpdated": "2026-02-20T13:35:04.657Z"
+    },
+    {
+      "name": "axelspringer",
+      "totalRepos": 46,
+      "activeRepos": 14,
+      "lastUpdated": "2026-02-20T13:35:06.904Z"
+    },
+    {
+      "name": "Media-Impact",
+      "totalRepos": 14,
+      "activeRepos": 4,
+      "lastUpdated": "2026-02-20T13:35:07.431Z"
+    },
+    {
+      "name": "spring-media",
+      "totalRepos": 1150,
+      "activeRepos": 637,
+      "lastUpdated": "2026-02-20T13:35:52.853Z"
+    },
+    {
+      "name": "welttv",
+      "totalRepos": 48,
+      "activeRepos": 38,
+      "lastUpdated": "2026-02-20T13:35:53.706Z"
+    }
+  ],
+  "trends": [
+    {
+      "date": "2026-02-20",
+      "AS-ASK-IT": 21,
+      "as-cloud-services": 136,
+      "asitservices": 813,
+      "axelspringer": 46,
+      "Media-Impact": 14,
+      "spring-media": 1150,
+      "welttv": 48
+    }
   ]
 }
