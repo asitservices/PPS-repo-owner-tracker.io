@@ -1,15 +1,11 @@
 /**
  * Repo Owner Tracker
  * - totalRepos: all repos in org (type=all), excluding archived
- * - activeRepos: RepoOwner custom property is NOT empty and NOT "Default..." (default-like)
- *
- * Features:
- * - Handles GitHub REST core rate limit by waiting until reset and retrying
- * - Uses a local cache to avoid re-fetching RepoOwner for every repo on every run
+ * - activeRepos: RepoOwner custom property is NOT empty and NOT a default-like placeholder
  *
  * Env:
- * - GH_PAT (required for private/internal repos + custom properties)
- * - DEBUG_REPOOWNER=1 (optional: prints repoOwner extraction for refreshed repos)
+ * - GH_PAT (required)
+ * - DEBUG_REPOOWNER=1 (optional)
  */
 
 const https = require('https');
@@ -62,23 +58,20 @@ function toLowerTrim(s) {
 
 /**
  * Convert RepoOwner raw value into a list of strings.
- * We avoid deep-searching arbitrary object keys to prevent false matches.
+ * Avoid deep-searching arbitrary object keys to prevent false matches.
  */
 function repoOwnerToList(raw) {
   if (raw == null) return [];
 
-  // scalar
   if (typeof raw === 'string' || typeof raw === 'number' || typeof raw === 'boolean') {
     const v = String(raw).trim();
     return v ? [v] : [];
   }
 
-  // array
   if (Array.isArray(raw)) {
     return raw.flatMap(repoOwnerToList).map(v => String(v).trim()).filter(Boolean);
   }
 
-  // object (select-like)
   if (typeof raw === 'object') {
     const fields = [raw.value, raw.name, raw.label, raw.display_name, raw.displayName];
     for (const f of fields) {
@@ -92,21 +85,35 @@ function repoOwnerToList(raw) {
 }
 
 /**
- * Treat values as "default-like" if they are empty or start with "default"
- * (e.g. "Default (Please choose ...)" from UI).
+ * Your enterprise uses placeholder text "Please choose a valid option!" as the default value.
+ * Treat all these as "default-like" => NOT active:
+ * - empty
+ * - "default", "default (...)" (any case)
+ * - "please choose ...", "please choose a valid option!"
+ * - generic "choose ..."
  */
 function isDefaultLike(v) {
   const s = toLowerTrim(v);
+
   if (!s) return true;
+
+  // classic / ui "Default (...)"
   if (s === 'default') return true;
   if (s.startsWith('default')) return true;
+
+  // your observed placeholder default:
+  if (s === 'please choose a valid option!') return true;
+
+  // other placeholder variants
+  if (s.includes('please choose')) return true;
+  if (s.includes('choose a valid option')) return true;
+  if (s.includes('choose')) return true;
+
   return false;
 }
 
 /**
  * Active if there exists at least one non-default-like value.
- * - empty / missing / "Default ..." => NOT active
- * - anything else => active
  */
 function isActiveByRepoOwner(rawRepoOwnerValue) {
   const values = repoOwnerToList(rawRepoOwnerValue).map(v => String(v).trim()).filter(Boolean);
@@ -213,7 +220,6 @@ async function getRepoOwnerCustomProperty(org, repo) {
   const url = `https://api.github.com/repos/${org}/${repo}/properties/values`;
   const result = await makeRequestWithRateLimitHandling(url);
 
-  // If we can't read properties, treat as "not active" by setting ok=false.
   if (!result.success || !result.data) return { ok: false, value: null, status: result.status };
 
   if (Array.isArray(result.data)) {
@@ -225,7 +231,6 @@ async function getRepoOwnerCustomProperty(org, repo) {
 
     if (!hit) return { ok: true, value: null, status: result.status };
 
-    // return ONLY the property value field (no guessing!)
     if ('value' in hit) return { ok: true, value: hit.value, status: result.status };
     if ('string_value' in hit) return { ok: true, value: hit.string_value, status: result.status };
     if ('selected_value' in hit) return { ok: true, value: hit.selected_value, status: result.status };
@@ -244,7 +249,7 @@ function cacheKey(org, repo) {
 
 async function collectData() {
   if (!PAT || !String(PAT).trim()) {
-    console.error('❌ GH_PAT is not set. Please set GH_PAT (required for private/internal repos and custom properties).');
+    console.error('❌ GH_PAT is not set. Please set GH_PAT.');
     process.exit(1);
   }
 
@@ -256,7 +261,6 @@ async function collectData() {
   const dashboardFile = path.join(dataDir, 'dashboard-data.json');
   const cacheFile = path.join(dataDir, 'repoowner-cache.json');
 
-  // cache: { "org/repo": { updated_at, repoOwnerRaw, repoOwnerList, active, cached_at } }
   const repoOwnerCache = safeJsonRead(cacheFile, {});
 
   const organizations = [];
@@ -267,7 +271,6 @@ async function collectData() {
 
     const repos = await listOrgRepos(org);
 
-    // refresh cache only when repo updated_at changed or missing cache
     const toRefresh = repos.filter(r => {
       const key = cacheKey(org, r.name);
       const cached = repoOwnerCache[key];
@@ -300,7 +303,6 @@ async function collectData() {
 
     const totalRepos = repos.length;
 
-    // compute active from cache
     const activeRepos = repos.filter(r => {
       const cached = repoOwnerCache[cacheKey(org, r.name)];
       return cached ? Boolean(cached.ok && cached.active) : false;
@@ -318,7 +320,6 @@ async function collectData() {
     console.log(`  ✅ ${org}: ${totalRepos} total (ohne archiv), ${activeRepos} aktiv\n`);
   }
 
-  // dashboard trends (keep last 90)
   const existingDashboard = safeJsonRead(dashboardFile, { organizations: [], trends: [] });
   let trends = Array.isArray(existingDashboard.trends) ? existingDashboard.trends : [];
   trends.push(trendEntry);
