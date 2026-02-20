@@ -54,6 +54,11 @@
         <div class="chart-container">
             <canvas id="trendsChart"></canvas>
         </div>
+
+        <!-- NEU: Prozent-Grafik -->
+        <div class="chart-container">
+            <canvas id="percentChart"></canvas>
+        </div>
     </div>
 
     <script>
@@ -61,59 +66,106 @@
             try {
                 const response = await fetch('./data/dashboard-data.json');
                 const data = await response.json();
+
+                const colors = ['#58a6ff', '#3fb950', '#d29922', '#f85149', '#a371f7', '#79c0ff', '#56d364'];
                 
-                // Stats
+                // Stats (oben)
                 const statsHtml = data.organizations
-                    .map(org => `
+                    .map(org => {
+                        const pct = org.totalRepos > 0 ? Math.round(((org.activeRepos || 0) / org.totalRepos) * 100) : 0;
+                        return `
                         <div class="card">
                             <h3>${org.name}</h3>
                             <div class="stat">${org.totalRepos}</div>
                             <p>Repositories</p>
-                            <div class="sub-stat">Aktiv: ${org.activeRepos || 0}</div>
-                        </div>
-                    `)
+                            <div class="sub-stat">Aktiv: ${org.activeRepos || 0} (${pct}%)</div>
+                        </div>`;
+                    })
                     .join('');
                 document.getElementById('stats').innerHTML = statsHtml;
                 
-                // Trends Chart
+                // Trends Chart (Repos total)
                 const dates = data.trends.map(t => t.date);
                 const orgs = data.organizations.map(o => o.name);
                 
-                const datasets = orgs.map((org, i) => {
-                    const colors = ['#58a6ff', '#3fb950', '#d29922', '#f85149', '#a371f7', '#79c0ff', '#56d364'];
+                const totalDatasets = orgs.map((org, i) => ({
+                    label: org,
+                    data: data.trends.map(t => t[org] || 0),
+                    borderColor: colors[i % colors.length],
+                    backgroundColor: colors[i % colors.length] + '20',
+                    tension: 0.3,
+                    fill: false
+                }));
+                
+                new Chart(document.getElementById('trendsChart'), {
+                    type: 'line',
+                    data: { labels: dates, datasets: totalDatasets },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { labels: { color: '#c9d1d9' } }
+                        },
+                        scales: {
+                            y: { ticks: { color: '#c9d1d9' }, grid: { color: '#30363d' } },
+                            x: { ticks: { color: '#c9d1d9' }, grid: { color: '#30363d' } }
+                        }
+                    }
+                });
+
+                // NEU: Prozent Chart (Aktiv in % vom aktuellen Stand)
+                // Achtung: In deinen Trends steht aktuell nur totalRepos pro Tag.
+                // Deshalb zeichnen wir pro Org eine horizontale Linie basierend auf aktuellem % (organizations[]).
+                const percentDatasets = orgs.map((org, i) => {
+                    const orgNow = data.organizations.find(o => o.name === org);
+                    const pct = orgNow && orgNow.totalRepos > 0
+                        ? ((orgNow.activeRepos || 0) / orgNow.totalRepos) * 100
+                        : 0;
+
                     return {
                         label: org,
-                        data: data.trends.map(t => t[org] || 0),
+                        data: dates.map(() => Number(pct.toFixed(2))), // gleiche % über alle Tage
                         borderColor: colors[i % colors.length],
                         backgroundColor: colors[i % colors.length] + '20',
                         tension: 0.3,
                         fill: false
                     };
                 });
-                
-                new Chart(document.getElementById('trendsChart'), {
+
+                new Chart(document.getElementById('percentChart'), {
                     type: 'line',
-                    data: { labels: dates, datasets },
+                    data: { labels: dates, datasets: percentDatasets },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
                         plugins: {
-                            legend: {
-                                labels: { color: '#c9d1d9' }
+                            legend: { labels: { color: '#c9d1d9' } },
+                            title: {
+                                display: true,
+                                text: 'Aktive Repos in % (aktueller Stand)',
+                                color: '#c9d1d9'
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: (ctx) => `${ctx.dataset.label}: ${ctx.parsed.y.toFixed(2)}%`
+                                }
                             }
                         },
                         scales: {
                             y: {
-                                ticks: { color: '#c9d1d9' },
+                                min: 0,
+                                max: 100,
+                                ticks: {
+                                    color: '#c9d1d9',
+                                    callback: (v) => v + '%'
+                                },
                                 grid: { color: '#30363d' }
                             },
-                            x: {
-                                ticks: { color: '#c9d1d9' },
-                                grid: { color: '#30363d' }
-                            }
+                            x: { ticks: { color: '#c9d1d9' }, grid: { color: '#30363d' } }
                         }
                     }
                 });
+
             } catch (error) {
                 console.error('Error loading data:', error);
             }
