@@ -3,17 +3,22 @@ const fs = require('fs');
 const path = require('path');
 
 const PAT = process.env.GH_PAT;
+const DEBUG_REPOOWNER = process.env.DEBUG_REPOOWNER === '1';
 
 function makeRequest(url) {
   return new Promise((resolve) => {
-    const options = {
-      headers: {
-        // zurück wie früher:
-        'Authorization': `token ${PAT}`,
-        'Accept': 'application/vnd.github.v3+json',
-        'User-Agent': 'Node.js'
-      }
+    const headers = {
+      'Accept': 'application/vnd.github.v3+json',
+      'User-Agent': 'Node.js'
     };
+
+    // Wie früher: wenn PAT fehlt, senden wir keinen Authorization Header.
+    // Dann liefert GitHub ggf. 401/403, aber Script läuft weiter.
+    if (PAT && String(PAT).trim().length > 0) {
+      headers['Authorization'] = `token ${PAT}`;
+    }
+
+    const options = { headers };
 
     https.get(url, options, (res) => {
       let data = '';
@@ -32,21 +37,50 @@ function makeRequest(url) {
   });
 }
 
-function normalizeToString(value) {
-  if (value == null) return '';
-  if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') return String(value).trim();
-  if (Array.isArray(value)) return value.map(normalizeToString).filter(Boolean).join(',').trim();
-  if (typeof value === 'object') {
-    if (typeof value.name === 'string') return value.name.trim();
-    if (typeof value.value === 'string') return value.value.trim();
-    if (typeof value.login === 'string') return value.login.trim();
+function extractRepoOwnerString(raw) {
+  if (raw == null) return '';
+
+  if (typeof raw === 'string' || typeof raw === 'number' || typeof raw === 'boolean') {
+    return String(raw).trim();
+  }
+
+  if (Array.isArray(raw)) {
+    return raw.map(extractRepoOwnerString).filter(Boolean).join(',').trim();
+  }
+
+  if (typeof raw === 'object') {
+    const candidates = [
+      raw.name,
+      raw.value,
+      raw.label,
+      raw.display_name,
+      raw.displayName,
+      raw.login
+    ];
+
+    for (const c of candidates) {
+      const s = extractRepoOwnerString(c);
+      if (s) return s;
+    }
+
+    // limited deep search
+    for (const k of Object.keys(raw)) {
+      const v = raw[k];
+      if (typeof v === 'string' && v.trim()) return v.trim();
+      if (v && typeof v === 'object') {
+        const s = extractRepoOwnerString(v);
+        if (s) return s;
+      }
+    }
+
     return '';
   }
+
   return '';
 }
 
-function isValidRepoOwner(value) {
-  const v = normalizeToString(value);
+function isActiveByRepoOwner(rawRepoOwnerValue) {
+  const v = extractRepoOwnerString(rawRepoOwnerValue).trim();
   if (!v) return false;
   if (v.toLowerCase() === 'default') return false;
   return true;
@@ -56,13 +90,7 @@ async function getRepoOwnerCustomProperty(org, repo) {
   const url = `https://api.github.com/repos/${org}/${repo}/properties/values`;
   const result = await makeRequest(url);
 
-  if (!result.success) {
-    // wichtiges Debug
-    console.log(`  ⚠️ ${org}/${repo}: cannot read custom properties (status=${result.status})`);
-    return null;
-  }
-
-  if (!result.data) return null;
+  if (!result.success || !result.data) return { ok: false, value: null, status: result.status };
 
   if (Array.isArray(result.data)) {
     const hit = result.data.find(p =>
@@ -70,20 +98,21 @@ async function getRepoOwnerCustomProperty(org, repo) {
       p.propertyName === 'RepoOwner' ||
       p.name === 'RepoOwner'
     );
-    if (!hit) return null;
+    if (!hit) return { ok: true, value: null, status: result.status };
 
-    if ('value' in hit) return hit.value;
-    if ('values' in hit) return hit.values;
-    if ('string_value' in hit) return hit.string_value;
-    if ('selected_value' in hit) return hit.selected_value;
-    return null;
+    if ('value' in hit) return { ok: true, value: hit.value, status: result.status };
+    if ('string_value' in hit) return { ok: true, value: hit.string_value, status: result.status };
+    if ('selected_value' in hit) return { ok: true, value: hit.selected_value, status: result.status };
+    if ('values' in hit) return { ok: true, value: hit.values, status: result.status };
+
+    return { ok: true, value: null, status: result.status };
   }
 
   if (typeof result.data === 'object' && result.data !== null) {
-    if ('RepoOwner' in result.data) return result.data.RepoOwner;
+    if ('RepoOwner' in result.data) return { ok: true, value: result.data.RepoOwner, status: result.status };
   }
 
-  return null;
+  return { ok: true, value: null, status: result.status };
 }
 
 async function mapWithConcurrency(items, limit, mapper) {
@@ -128,22 +157,22 @@ async function getOrgRepos(org) {
     page++;
   }
 
-  // total = alle visibilities, ohne archiv
-  const filteredRepos = allRepos.filter(r => !r.archived);
+  const repos = allRepos.filter(r => !r.archived);
 
-  // active = RepoOwner gesetzt (nicht default/leer)
-  const repoOwnerValues = await mapWithConcurrency(filteredRepos, 6, async (r) => {
-    try {
-      return await getRepoOwnerCustomProperty(org, r.name);
-    } catch {
-      return null;
+  const props = await mapWithConcurrency(repos, 8, async (r) => {
+    const { ok, value, status } = await getRepoOwnerCustomProperty(org, r.name);
+
+    if (DEBUG_REPOOWNER) {
+      console.log(`  🔎 ${org}/${r.name} propsStatus=${status} raw=`, value, ' extracted=', extractRepoOwnerString(value));
     }
+
+    return { ok, value };
   });
 
-  const activeRepos = repoOwnerValues.filter(isValidRepoOwner).length;
+  const activeRepos = props.filter(x => x.ok && isActiveByRepoOwner(x.value)).length;
 
-  console.log(`  ✅ ${org}: ${filteredRepos.length} total (public+private+internal, ohne archiv), ${activeRepos} aktiv (RepoOwner != default/leer)\n`);
-  return { totalRepos: filteredRepos.length, activeRepos };
+  console.log(`  ✅ ${org}: ${repos.length} total (ohne archiv), ${activeRepos} aktiv (RepoOwner != default/leer)\n`);
+  return { totalRepos: repos.length, activeRepos };
 }
 
 async function collectData() {
@@ -183,6 +212,7 @@ async function collectData() {
 
   let trends = [];
   const dataFile = path.join(dataDir, 'dashboard-data.json');
+
   if (fs.existsSync(dataFile)) {
     try {
       const existing = JSON.parse(fs.readFileSync(dataFile, 'utf8'));
