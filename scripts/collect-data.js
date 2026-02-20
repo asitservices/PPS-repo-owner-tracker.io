@@ -8,10 +8,9 @@ function makeRequest(url) {
   return new Promise((resolve) => {
     const options = {
       headers: {
-        // Bearer ist für neue Tokens zuverlässiger
-        'Authorization': `Bearer ${PAT}`,
-        'Accept': 'application/vnd.github+json',
-        'X-GitHub-Api-Version': '2022-11-28',
+        // zurück wie früher:
+        'Authorization': `token ${PAT}`,
+        'Accept': 'application/vnd.github.v3+json',
         'User-Agent': 'Node.js'
       }
     };
@@ -35,22 +34,14 @@ function makeRequest(url) {
 
 function normalizeToString(value) {
   if (value == null) return '';
-
-  if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
-    return String(value).trim();
-  }
-
-  if (Array.isArray(value)) {
-    return value.map(normalizeToString).filter(Boolean).join(',').trim();
-  }
-
+  if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') return String(value).trim();
+  if (Array.isArray(value)) return value.map(normalizeToString).filter(Boolean).join(',').trim();
   if (typeof value === 'object') {
     if (typeof value.name === 'string') return value.name.trim();
     if (typeof value.value === 'string') return value.value.trim();
     if (typeof value.login === 'string') return value.login.trim();
     return '';
   }
-
   return '';
 }
 
@@ -61,16 +52,18 @@ function isValidRepoOwner(value) {
   return true;
 }
 
-// Custom Property RepoOwner holen
-// Hinweis: je nach GitHub-Version kann der Endpoint anders sein.
-// Falls du hier 404 bekommst, sag mir status+body, dann passe ich an.
 async function getRepoOwnerCustomProperty(org, repo) {
   const url = `https://api.github.com/repos/${org}/${repo}/properties/values`;
   const result = await makeRequest(url);
 
-  if (!result.success || !result.data) return null;
+  if (!result.success) {
+    // wichtiges Debug
+    console.log(`  ⚠️ ${org}/${repo}: cannot read custom properties (status=${result.status})`);
+    return null;
+  }
 
-  // meistens ist es ein Array
+  if (!result.data) return null;
+
   if (Array.isArray(result.data)) {
     const hit = result.data.find(p =>
       p.property_name === 'RepoOwner' ||
@@ -79,16 +72,13 @@ async function getRepoOwnerCustomProperty(org, repo) {
     );
     if (!hit) return null;
 
-    // value kann verschiedene Formen haben
     if ('value' in hit) return hit.value;
     if ('values' in hit) return hit.values;
     if ('string_value' in hit) return hit.string_value;
     if ('selected_value' in hit) return hit.selected_value;
-
     return null;
   }
 
-  // oder map/object
   if (typeof result.data === 'object' && result.data !== null) {
     if ('RepoOwner' in result.data) return result.data.RepoOwner;
   }
@@ -123,7 +113,6 @@ async function getOrgRepos(org) {
     const url = `https://api.github.com/orgs/${org}/repos?per_page=100&page=${page}&type=all`;
     const result = await makeRequest(url);
 
-    // Debug wenn es schiefgeht (damit du sofort Permissions/SSO siehst)
     if (!result.success) {
       console.error(`  ❌ ${org}: cannot list repos. status=${result.status}`);
       console.error(`  ❌ response:`, result.data);
@@ -139,11 +128,11 @@ async function getOrgRepos(org) {
     page++;
   }
 
-  // TOTAL = alle Sichtbarkeiten (public/private/internal), aber keine archived
+  // total = alle visibilities, ohne archiv
   const filteredRepos = allRepos.filter(r => !r.archived);
 
-  // ACTIVE = RepoOwner != default/leer
-  const repoOwnerValues = await mapWithConcurrency(filteredRepos, 8, async (r) => {
+  // active = RepoOwner gesetzt (nicht default/leer)
+  const repoOwnerValues = await mapWithConcurrency(filteredRepos, 6, async (r) => {
     try {
       return await getRepoOwnerCustomProperty(org, r.name);
     } catch {
@@ -153,7 +142,7 @@ async function getOrgRepos(org) {
 
   const activeRepos = repoOwnerValues.filter(isValidRepoOwner).length;
 
-  console.log(`  ✅ ${org}: ${filteredRepos.length} total (public+private+internal, ohne archiv), ${activeRepos} aktiv (RepoOwner gesetzt)\n`);
+  console.log(`  ✅ ${org}: ${filteredRepos.length} total (public+private+internal, ohne archiv), ${activeRepos} aktiv (RepoOwner != default/leer)\n`);
   return { totalRepos: filteredRepos.length, activeRepos };
 }
 
@@ -194,7 +183,6 @@ async function collectData() {
 
   let trends = [];
   const dataFile = path.join(dataDir, 'dashboard-data.json');
-
   if (fs.existsSync(dataFile)) {
     try {
       const existing = JSON.parse(fs.readFileSync(dataFile, 'utf8'));
