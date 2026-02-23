@@ -1,5 +1,5 @@
 /**
- * Repo Owner Tracker - KORREKTES FORMAT für Website
+ * Repo Owner Tracker - Speichert nur INAKTIVE Repos
  */
 
 const https = require('https');
@@ -161,6 +161,7 @@ async function collectData() {
   ensureDir(dataDir);
 
   const dashboardFile = path.join(dataDir, 'dashboard-data.json');
+  const detailFile = path.join(dataDir, 'repos-detail.json');
 
   // Lade existierende Daten für Trends
   const existingData = safeJsonRead(dashboardFile, { organizations: [], trends: [] });
@@ -168,6 +169,7 @@ async function collectData() {
 
   const organizations = [];
   const trendEntry = { date: nowDateOnly };
+  const inactiveRepos = [];  // NUR inaktive Repos
 
   for (const org of ORGS) {
     console.log(`\n📦 ${org}`);
@@ -184,6 +186,15 @@ async function collectData() {
 
       if (active) {
         activeCount++;
+      } else {
+        // NUR inaktive Repos speichern
+        inactiveRepos.push({
+          org,
+          repo: repo.name,
+          url: `https://github.com/${org}/${repo.name}`,
+          repoOwner: repoOwnerValue,
+          isActive: false
+        });
       }
 
       // Kleine Pause zwischen Requests
@@ -215,7 +226,7 @@ async function collectData() {
     trends = trends.slice(-90);
   }
 
-  // Speichere mit dem RICHTIGEN FORMAT für die Website
+  // Speichere Dashboard-Daten
   const dashboardData = {
     generatedAt: nowIso,
     organizations,
@@ -224,15 +235,27 @@ async function collectData() {
 
   safeJsonWrite(dashboardFile, dashboardData);
 
+  // Speichere NUR inaktive Repos
+  const detailData = {
+    generatedAt: nowIso,
+    totalInactive: inactiveRepos.length,
+    repos: inactiveRepos
+  };
+
+  safeJsonWrite(detailFile, detailData);
+
   console.log('\n═══════════════════════════════════════════════════════════');
   console.log('✅ Data collected!');
   console.log('═══════════════════════════════════════════════════════════');
   console.log(`\n📊 Summary:`);
   organizations.forEach(org => {
     const pct = org.totalRepos > 0 ? Math.round((org.activeRepos / org.totalRepos) * 100) : 0;
-    console.log(`   ${org.name}: ${org.totalRepos} total, ${org.activeRepos} aktiv (${pct}%)`);
+    console.log(`   ${org.name}: ${org.totalRepos} total, ${org.activeRepos} aktiv (${pct}%), ${org.inactiveRepos} inaktiv`);
   });
-  console.log(`\n📁 File: ${dashboardFile}`);
+  console.log(`\n📁 Files:`);
+  console.log(`   ${dashboardFile}`);
+  console.log(`   ${detailFile}`);
+  console.log(`   Total inaktive repos: ${inactiveRepos.length}`);
   console.log('═══════════════════════════════════════════════════════════\n');
 }
 
