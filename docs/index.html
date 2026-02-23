@@ -50,7 +50,7 @@
             height: 400px;
         }
 
-        /* Modal für Repos-Details */
+        /* Modal */
         .modal {
             display: none;
             position: fixed;
@@ -120,6 +120,7 @@
             color: #58a6ff;
             text-decoration: none;
             font-weight: 500;
+            word-break: break-all;
         }
         .repo-name:hover {
             text-decoration: underline;
@@ -135,6 +136,7 @@
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
+            flex-shrink: 0;
         }
 
         .stats-modal {
@@ -174,9 +176,6 @@
             border: 1px solid #30363d;
             border-radius: 4px;
             color: #c9d1d9;
-        }
-        .search-box input::placeholder {
-            color: #8b949e;
         }
     </style>
 </head>
@@ -219,24 +218,26 @@
     </div>
 
     <script>
-        let allInactiveRepos = [];
+        let dashboardData = null;
+        let currentInactiveRepos = [];
         let filteredRepos = [];
-        let currentOrg = null;
 
         async function loadData() {
             try {
-                const response = await fetch('./data/dashboard-data.json');
-                const data = await response.json();
+                const response = await fetch('./data/repos-detail.json');
+                dashboardData = await response.json();
 
-                console.log('Dashboard data loaded:', data);
+                console.log('Data loaded:', dashboardData);
+                console.log('Total inactive repos:', dashboardData.repos ? dashboardData.repos.length : 0);
 
                 const colors = ['#58a6ff', '#3fb950', '#d29922', '#f85149', '#a371f7', '#79c0ff', '#56d364'];
                 
-                // Lade detaillierte Repo-Daten
-                await loadInactiveRepos();
+                // Load dashboard stats
+                const dashResponse = await fetch('./data/dashboard-data.json');
+                const dash = await dashResponse.json();
                 
-                // Stats (oben) - mit Click-Handler
-                const statsHtml = data.organizations
+                // Stats Cards
+                const statsHtml = dash.organizations
                     .map(org => {
                         const pct = org.totalRepos > 0 ? Math.round(((org.activeRepos || 0) / org.totalRepos) * 100) : 0;
                         return `
@@ -252,12 +253,12 @@
                 document.getElementById('stats').innerHTML = statsHtml;
                 
                 // Trends Chart
-                const dates = data.trends.map(t => t.date);
-                const orgs = data.organizations.map(o => o.name);
+                const dates = dash.trends.map(t => t.date);
+                const orgs = dash.organizations.map(o => o.name);
                 
                 const totalDatasets = orgs.map((org, i) => ({
                     label: org,
-                    data: data.trends.map(t => t[org] || 0),
+                    data: dash.trends.map(t => t[org] || 0),
                     borderColor: colors[i % colors.length],
                     backgroundColor: colors[i % colors.length] + '20',
                     tension: 0.3,
@@ -285,9 +286,9 @@
                     }
                 });
 
-                // Prozent Chart
+                // Percent Chart
                 const percentDatasets = orgs.map((org, i) => {
-                    const orgNow = data.organizations.find(o => o.name === org);
+                    const orgNow = dash.organizations.find(o => o.name === org);
                     const pct = orgNow && orgNow.totalRepos > 0
                         ? ((orgNow.activeRepos || 0) / orgNow.totalRepos) * 100
                         : 0;
@@ -341,62 +342,47 @@
             }
         }
 
-        async function loadInactiveRepos() {
-            try {
-                const response = await fetch('./data/repos-detail.json');
-                const data = await response.json();
-                console.log('Inactive repos data loaded:', data);
-                
-                allInactiveRepos = data.repos || [];
-                console.log('Total inactive repos loaded:', allInactiveRepos.length);
-            } catch (error) {
-                console.error('Error loading inactive repos:', error);
-                allInactiveRepos = [];
-            }
-        }
-
         function showInactiveRepos(org) {
-            currentOrg = org;
+            console.log('Showing repos for:', org);
             
-            // Filtere nur inaktive Repos für diese Org
-            const orgInactiveRepos = allInactiveRepos.filter(r => r.org === org);
-            filteredRepos = orgInactiveRepos;
+            // Filter inaktive repos für diese Org
+            currentInactiveRepos = dashboardData.repos.filter(r => r.org === org);
+            filteredRepos = [...currentInactiveRepos];
 
-            console.log(`Showing ${orgInactiveRepos.length} inactive repos for ${org}`);
+            console.log('Found', currentInactiveRepos.length, 'inactive repos');
 
-            // Hole die Total-Werte vom API
+            // Stats
             fetch('./data/dashboard-data.json')
                 .then(r => r.json())
                 .then(data => {
                     const orgData = data.organizations.find(o => o.name === org);
-                    const totalRepos = orgData?.totalRepos || 0;
-                    const activeRepos = orgData?.activeRepos || 0;
-                    const inactiveRepos = orgData?.inactiveRepos || 0;
-
+                    
                     document.getElementById('modalTitle').textContent = `${org} - Inaktive Repositories`;
 
                     const statsHtml = `
                         <div class="stat-box">
-                            <div class="number">${totalRepos}</div>
+                            <div class="number">${orgData.totalRepos}</div>
                             <div class="label">Total Repos</div>
                         </div>
                         <div class="stat-box">
-                            <div class="number" style="color: #3fb950;">${activeRepos}</div>
+                            <div class="number" style="color: #3fb950;">${orgData.activeRepos}</div>
                             <div class="label">Aktiv</div>
                         </div>
                         <div class="stat-box inactive">
-                            <div class="number">${inactiveRepos}</div>
+                            <div class="number">${orgData.inactiveRepos}</div>
                             <div class="label">Nicht Aktiv</div>
                         </div>
                     `;
                     document.getElementById('statsModal').innerHTML = statsHtml;
 
-                    renderReposList(orgInactiveRepos);
+                    renderReposList(currentInactiveRepos);
                     document.getElementById('reposModal').classList.add('active');
                 });
         }
 
         function renderReposList(repos) {
+            console.log('Rendering', repos.length, 'repos');
+            
             if (repos.length === 0) {
                 document.getElementById('reposList').innerHTML = `
                     <div style="text-align: center; color: #3fb950; padding: 20px;">
@@ -412,7 +398,7 @@
                         <a href="${repo.url}" target="_blank" class="repo-name">
                             ${repo.repo}
                         </a>
-                        <div class="repo-value">
+                        <div class="repo-value" title="${repo.repoOwner || 'null'}">
                             ${repo.repoOwner || 'null'}
                         </div>
                     </div>
@@ -424,17 +410,16 @@
 
         function filterRepos() {
             const searchText = document.getElementById('searchInput').value.toLowerCase();
-            const filtered = filteredRepos.filter(r => 
+            filteredRepos = currentInactiveRepos.filter(r => 
                 r.repo.toLowerCase().includes(searchText)
             );
-            renderReposList(filtered);
+            renderReposList(filteredRepos);
         }
 
         function closeModal() {
             document.getElementById('reposModal').classList.remove('active');
         }
 
-        // Schließe Modal wenn außen geklickt
         window.onclick = function(event) {
             const modal = document.getElementById('reposModal');
             if (event.target === modal) {
