@@ -14,7 +14,8 @@ const ORGS = [
   'axelspringer',
   'Media-Impact',
   'spring-media',
-  'welttv'
+  'welttv',
+  'sales-impact'
 ];
 
 const PAT = process.env.GH_PAT;
