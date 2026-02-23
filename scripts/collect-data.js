@@ -19,6 +19,16 @@ const ORGS = [
 ];
 
 const PAT = process.env.GH_PAT;
+const PAT_SALES_IMPACT = process.env.GH_PAT_SALES_IMPACT;
+
+// Orgs die einen Fine-grained PAT brauchen
+const FINE_GRAINED_ORGS = {
+  'sales-impact': PAT_SALES_IMPACT
+};
+
+function getTokenForOrg(org) {
+  return FINE_GRAINED_ORGS[org] || PAT;
+}
 
 function sleep(ms) {
   return new Promise(r => setTimeout(r, ms));
@@ -64,10 +74,10 @@ function isInactive(value) {
 
 // ===== HTTP =====
 
-function makeRequest(url) {
+function makeRequest(url, token = PAT) {
   return new Promise((resolve) => {
     const headers = {
-      'Authorization': `Bearer ${PAT}`,
+      'Authorization': `Bearer ${token}`,
       'Accept': 'application/vnd.github.v3+json',
       'User-Agent': 'repo-owner-tracker'
     };
@@ -90,15 +100,15 @@ function makeRequest(url) {
   });
 }
 
-async function makeRequestWithRateLimitHandling(url) {
-  const r1 = await makeRequest(url);
+async function makeRequestWithRateLimitHandling(url, token = PAT) {
+  const r1 = await makeRequest(url, token);
 
   if (r1.status === 403 && r1.data?.message?.includes('API rate limit')) {
     const resetMs = Number(r1.headers?.['x-ratelimit-reset']) * 1000;
     const waitMs = Math.max(0, resetMs - Date.now()) + 1500;
     console.log(`⏳ Rate limit. Waiting ${(waitMs / 1000).toFixed(0)}s...`);
     await sleep(waitMs);
-    return await makeRequest(url);
+    return await makeRequest(url, token);
   }
 
   return r1;
@@ -107,15 +117,26 @@ async function makeRequestWithRateLimitHandling(url) {
 // ===== GITHUB API =====
 
 async function listOrgRepos(org) {
+  const token = getTokenForOrg(org);
   let allRepos = [];
   let page = 1;
 
   while (true) {
     const url = `https://api.github.com/orgs/${org}/repos?per_page=100&page=${page}&type=all`;
-    const result = await makeRequestWithRateLimitHandling(url);
+    const result = await makeRequestWithRateLimitHandling(url, token);
 
     if (!result.success) {
+      const msg = result.data?.message || 'Unknown error';
+      const docUrl = result.data?.documentation_url || '';
       console.error(`  ❌ Cannot list repos. Status: ${result.status}`);
+      console.error(`     Message: ${msg}`);
+      if (docUrl) console.error(`     Docs: ${docUrl}`);
+      if (result.status === 403) {
+        console.error(`     💡 Mögliche Ursachen für 403:`);
+        console.error(`        - PAT nicht für SAML SSO autorisiert (Settings → Developer Settings → PAT → Configure SSO)`);
+        console.error(`        - Fine-grained PAT hat keinen Zugriff auf diese Org`);
+        console.error(`        - Fehlende Scopes: repo, read:org, admin:org`);
+      }
       return [];
     }
 
@@ -132,8 +153,9 @@ async function listOrgRepos(org) {
 }
 
 async function getRepoOwnerValue(org, repo) {
+  const token = getTokenForOrg(org);
   const url = `https://api.github.com/repos/${org}/${repo}/properties/values`;
-  const result = await makeRequestWithRateLimitHandling(url);
+  const result = await makeRequestWithRateLimitHandling(url, token);
 
   if (!result.success || !Array.isArray(result.data)) {
     return null;
@@ -155,6 +177,45 @@ async function collectData() {
     console.error('❌ GH_PAT is not set.');
     process.exit(1);
   }
+
+  // Pre-flight check: PAT validity & scopes
+  console.log('🔑 Checking PAT validity...');
+  const tokenCheck = await makeRequest('https://api.github.com/user');
+  if (!tokenCheck.success) {
+    console.error(`❌ PAT is invalid or expired. Status: ${tokenCheck.status}`);
+    console.error(`   Message: ${tokenCheck.data?.message || 'Unknown'}`);
+    process.exit(1);
+  }
+  console.log(`✅ Authenticated as: ${tokenCheck.data?.login}`);
+  const scopes = tokenCheck.headers?.['x-oauth-scopes'] || 'N/A (Fine-grained PAT)';
+  console.log(`📋 PAT Scopes: ${scopes}`);
+
+  if (PAT_SALES_IMPACT) {
+    console.log('🔑 Checking Fine-grained PAT for sales-impact...');
+    const siCheck = await makeRequest('https://api.github.com/user', PAT_SALES_IMPACT);
+    if (!siCheck.success) {
+      console.error(`❌ GH_PAT_SALES_IMPACT is invalid. Status: ${siCheck.status}`);
+    } else {
+      console.log(`✅ Fine-grained PAT OK (${siCheck.data?.login})`);
+    }
+  } else {
+    console.warn('⚠️  GH_PAT_SALES_IMPACT nicht gesetzt - sales-impact wird mit Classic PAT versucht (wird wahrscheinlich 403 geben)');
+  }
+
+  // Check access to each org
+  for (const org of ORGS) {
+    const token = getTokenForOrg(org);
+    const orgCheck = await makeRequest(`https://api.github.com/orgs/${org}`, token);
+    if (!orgCheck.success) {
+      console.warn(`⚠️  ${org}: Status ${orgCheck.status} - ${orgCheck.data?.message || 'No access'}`);
+      if (orgCheck.status === 403) {
+        console.warn(`   💡 PAT hat keinen Zugriff auf "${org}". SAML SSO autorisieren oder Fine-grained PAT erweitern!`);
+      }
+    } else {
+      console.log(`✅ ${org}: Access OK`);
+    }
+  }
+  console.log('');
 
   const nowIso = new Date().toISOString();
   const nowDateOnly = isoDateOnly(nowIso);
@@ -197,7 +258,7 @@ async function collectData() {
         
         inactiveRepos.push({
           repo: repo.name,
-          url: `https://github.com/${org}/${repo.name}`,
+          url: `https://github.com/${org}/${repo.name}/custom-properties`,
           repoOwner: repoOwnerValue
         });
       }

@@ -21,6 +21,7 @@ jobs:
       - name: Run data collection
         env:
           GH_PAT: ${{ secrets.GH_PAT }}
+          GH_PAT_SALES_IMPACT: ${{ secrets.GH_PAT_SALES_IMPACT }}
         run: node scripts/collect-data.js
       
       - name: Commit and push
