@@ -1,8 +1,5 @@
 /**
- * Repo Owner Tracker - KORREKT
- * Prüft Custom Property "RepoOwner" in jedem Repo
- * - AKTIV: RepoOwner hat einen echten Wert (NICHT "Please choose..." und NICHT "default")
- * - NICHT AKTIV: RepoOwner ist leer oder "Please choose a valid option!" oder "default"
+ * Repo Owner Tracker - SIMPLE VERSION (ohne Concurrency-Fehler)
  */
 
 const https = require('https');
@@ -29,15 +26,6 @@ function ensureDir(dirPath) {
   if (!fs.existsSync(dirPath)) fs.mkdirSync(dirPath, { recursive: true });
 }
 
-function safeJsonRead(filePath, fallback) {
-  try {
-    if (!fs.existsSync(filePath)) return fallback;
-    return JSON.parse(fs.readFileSync(filePath, 'utf8'));
-  } catch {
-    return fallback;
-  }
-}
-
 function safeJsonWrite(filePath, obj) {
   fs.writeFileSync(filePath, JSON.stringify(obj, null, 2));
 }
@@ -49,40 +37,36 @@ function isoDateOnly(iso) {
 // ===== CORE LOGIC =====
 
 /**
- * WICHTIG: Prüft ob ein RepoOwner Wert "nicht aktiv" ist
- * NICHT AKTIV wenn:
- * - null, undefined, oder leer
- * - "Please choose a valid option!"
- * - "default"
+ * Prüft ob RepoOwner NICHT AKTIV ist
  */
-function isInactiveValue(value) {
-  // Null oder undefined = NICHT AKTIV
+function isInactive(value) {
+  console.log(`    Check: "${value}" -> `, end='');
+  
   if (value === null || value === undefined) {
+    console.log('NICHT AKTIV (null)');
     return true;
   }
 
-  // Konvertiere zu String und trimme
   const s = String(value).trim();
 
-  // Leer = NICHT AKTIV
   if (s === '') {
+    console.log('NICHT AKTIV (leer)');
     return true;
   }
 
-  // Lowercase für Vergleich
   const lower = s.toLowerCase();
 
-  // "Please choose a valid option!" = NICHT AKTIV
   if (lower === 'please choose a valid option!') {
+    console.log('NICHT AKTIV (placeholder)');
     return true;
   }
 
-  // "default" oder "default (...)" = NICHT AKTIV
   if (lower === 'default' || lower.startsWith('default')) {
+    console.log('NICHT AKTIV (default)');
     return true;
   }
 
-  // Ansonsten = AKTIV (hat einen echten Wert)
+  console.log(`AKTIV ("${value}")`);
   return false;
 }
 
@@ -101,55 +85,30 @@ function makeRequest(url) {
       res.on('data', chunk => data += chunk);
       res.on('end', () => {
         let parsed = null;
-        try { parsed = data ? JSON.parse(data) : null; } catch { parsed = data; }
+        try { parsed = data ? JSON.parse(data) : null; } catch { }
 
         resolve({
           success: res.statusCode >= 200 && res.statusCode < 300,
           status: res.statusCode,
-          headers: res.headers,
           data: parsed
         });
       });
-    }).on('error', (err) => resolve({ success: false, status: 0, headers: {}, data: String(err) }));
+    }).on('error', (err) => resolve({ success: false, status: 0, data: null }));
   });
 }
 
 async function makeRequestWithRateLimitHandling(url) {
   const r1 = await makeRequest(url);
 
-  const msg = (r1 && r1.data && typeof r1.data === 'object') ? String(r1.data.message || '') : '';
-  const isRateLimited =
-    r1.status === 403 &&
-    msg.toLowerCase().includes('api rate limit exceeded') &&
-    r1.headers &&
-    r1.headers['x-ratelimit-reset'];
-
-  if (!isRateLimited) return r1;
-
-  const resetMs = Number(r1.headers['x-ratelimit-reset']) * 1000;
-  const waitMs = Math.max(0, resetMs - Date.now()) + 1500;
-
-  console.log(`⏳ Rate limit hit. Waiting ${(waitMs / 1000).toFixed(0)}s until reset...`);
-  await sleep(waitMs);
-
-  return await makeRequest(url);
-}
-
-async function mapWithConcurrency(items, limit, mapper) {
-  const results = new Array(items.length);
-  let idx = 0;
-
-  async function worker() {
-    while (true) {
-      const current = idx++;
-      if (current >= items.length) return;
-      results[current] = await mapper(items[current], current);
-    }
+  if (r1.status === 403 && r1.data?.message?.includes('API rate limit')) {
+    const resetMs = Number(r1.headers?.['x-ratelimit-reset']) * 1000;
+    const waitMs = Math.max(0, resetMs - Date.now()) + 1500;
+    console.log(`⏳ Rate limit. Waiting ${(waitMs / 1000).toFixed(0)}s...`);
+    await sleep(waitMs);
+    return await makeRequest(url);
   }
 
-  const workers = Array.from({ length: Math.min(limit, items.length) }, () => worker());
-  await Promise.all(workers);
-  return results;
+  return r1;
 }
 
 // ===== GITHUB API =====
@@ -163,24 +122,23 @@ async function listOrgRepos(org) {
     const result = await makeRequestWithRateLimitHandling(url);
 
     if (!result.success) {
-      console.error(`  ❌ ${org}: cannot list repos. status=${result.status}`);
+      console.error(`  ❌ Cannot list repos. Status: ${result.status}`);
       return [];
     }
 
     if (!Array.isArray(result.data) || result.data.length === 0) break;
 
     allRepos = allRepos.concat(result.data);
-    console.log(`  📄 Page ${page}: ${result.data.length} repos`);
+    console.log(`  📄 Page ${page}: ${result.data.length} repos (Total: ${allRepos.length})`);
 
     if (result.data.length < 100) break;
     page++;
   }
 
-  // Filter nur nicht-archivierte Repos
   return allRepos.filter(r => !r.archived);
 }
 
-async function getRepoOwnerProperty(org, repo) {
+async function getRepoOwnerValue(org, repo) {
   const url = `https://api.github.com/repos/${org}/${repo}/properties/values`;
   const result = await makeRequestWithRateLimitHandling(url);
 
@@ -188,13 +146,13 @@ async function getRepoOwnerProperty(org, repo) {
     return null;
   }
 
-  const repoOwner = result.data.find(p => p.property_name === 'RepoOwner');
+  const prop = result.data.find(p => p.property_name === 'RepoOwner');
   
-  if (!repoOwner) {
+  if (!prop) {
     return null;
   }
 
-  return repoOwner.value;
+  return prop.value;
 }
 
 // ===== MAIN =====
@@ -211,7 +169,6 @@ async function collectData() {
   ensureDir(dataDir);
 
   const dashboardFile = path.join(dataDir, 'dashboard-data.json');
-  const detailFile = path.join(dataDir, 'repos-detail.json');
 
   const organizations = [];
   const allReposDetail = [];
@@ -219,34 +176,31 @@ async function collectData() {
   for (const org of ORGS) {
     console.log(`\n📦 ${org}`);
 
-    // 1. Hole alle Repos
     const repos = await listOrgRepos(org);
-    console.log(`  📊 Total: ${repos.length} repositories (ohne archiv)`);
+    console.log(`  🔍 Checking RepoOwner for ${repos.length} repos...\n`);
 
-    // 2. Prüfe RepoOwner für jedes Repo
     let activeCount = 0;
-    const reposDetail = [];
 
-    await mapWithConcurrency(repos, 5, async (repo) => {
-      const repoOwnerValue = await getRepoOwnerProperty(org, repo.name);
-      
-      // WICHTIG: isInactiveValue() gibt true zurück wenn NICHT AKTIV
-      const isActive = !isInactiveValue(repoOwnerValue);
+    for (const repo of repos) {
+      const repoOwnerValue = await getRepoOwnerValue(org, repo.name);
+      const inactive = isInactive(repoOwnerValue);
+      const active = !inactive;
 
-      if (isActive) {
+      if (active) {
         activeCount++;
       }
 
-      reposDetail.push({
+      allReposDetail.push({
         org,
         repo: repo.name,
         url: `https://github.com/${org}/${repo.name}`,
         repoOwner: repoOwnerValue,
-        isActive
+        isActive: active
       });
 
-      allReposDetail.push(reposDetail[reposDetail.length - 1]);
-    });
+      // Kleine Pause zwischen Requests
+      await sleep(50);
+    }
 
     const totalRepos = repos.length;
     const inactiveCount = totalRepos - activeCount;
@@ -259,10 +213,7 @@ async function collectData() {
       lastUpdated: nowIso
     });
 
-    console.log(`\n  ✅ ${org}:`);
-    console.log(`     📊 Total: ${totalRepos}`);
-    console.log(`     ✅ Aktiv: ${activeCount}`);
-    console.log(`     ❌ Nicht Aktiv: ${inactiveCount}`);
+    console.log(`\n  ✅ ${org}: ${totalRepos} total (ohne archiv), ${activeCount} aktiv (RepoOwner != default/leer)\n`);
   }
 
   // Speichere Dashboard
@@ -276,22 +227,14 @@ async function collectData() {
     }
   });
 
-  // Speichere Details
-  safeJsonWrite(detailFile, {
-    generatedAt: nowIso,
-    repos: allReposDetail
-  });
-
-  console.log('\n\n═══════════════════════════════════════════════════════════');
-  console.log('✅ Data collected and saved!');
+  console.log('\n═══════════════════════════════════════════════════════════');
+  console.log('✅ Data collected!');
   console.log('═══════════════════════════════════════════════════════════');
   console.log(`\n📊 Summary:`);
   console.log(`   Total Repos: ${allReposDetail.length}`);
   console.log(`   ✅ Aktiv: ${allReposDetail.filter(r => r.isActive).length}`);
   console.log(`   ❌ Nicht Aktiv: ${allReposDetail.filter(r => !r.isActive).length}`);
-  console.log('\n📁 Files saved:');
-  console.log(`   ${dashboardFile}`);
-  console.log(`   ${detailFile}`);
+  console.log(`\n📁 File: ${dashboardFile}`);
   console.log('═══════════════════════════════════════════════════════════\n');
 }
 
