@@ -1,59 +1,66 @@
 {
-  "generatedAt": "2026-02-23T10:48:11.131Z",
+  "generatedAt": "2026-02-23T11:41:06.546Z",
   "organizations": [
     {
       "name": "AS-ASK-IT",
       "totalRepos": 21,
       "activeRepos": 0,
       "inactiveRepos": 21,
-      "lastUpdated": "2026-02-23T10:48:11.131Z"
+      "lastUpdated": "2026-02-23T11:41:06.546Z"
     },
     {
       "name": "as-cloud-services",
       "totalRepos": 136,
       "activeRepos": 1,
       "inactiveRepos": 135,
-      "lastUpdated": "2026-02-23T10:48:11.131Z"
+      "lastUpdated": "2026-02-23T11:41:06.546Z"
     },
     {
       "name": "asitservices",
       "totalRepos": 813,
       "activeRepos": 226,
       "inactiveRepos": 587,
-      "lastUpdated": "2026-02-23T10:48:11.131Z"
+      "lastUpdated": "2026-02-23T11:41:06.546Z"
     },
     {
       "name": "axelspringer",
       "totalRepos": 46,
       "activeRepos": 0,
       "inactiveRepos": 46,
-      "lastUpdated": "2026-02-23T10:48:11.131Z"
+      "lastUpdated": "2026-02-23T11:41:06.546Z"
     },
     {
       "name": "Media-Impact",
       "totalRepos": 14,
       "activeRepos": 14,
       "inactiveRepos": 0,
-      "lastUpdated": "2026-02-23T10:48:11.131Z"
+      "lastUpdated": "2026-02-23T11:41:06.546Z"
     },
     {
       "name": "spring-media",
       "totalRepos": 1149,
-      "activeRepos": 351,
-      "inactiveRepos": 798,
-      "lastUpdated": "2026-02-23T10:48:11.131Z"
+      "activeRepos": 1149,
+      "inactiveRepos": 0,
+      "lastUpdated": "2026-02-23T11:41:06.546Z"
     },
     {
       "name": "welttv",
-      "totalRepos": 0,
+      "totalRepos": 48,
       "activeRepos": 0,
-      "inactiveRepos": 0,
-      "lastUpdated": "2026-02-23T10:48:11.131Z"
+      "inactiveRepos": 48,
+      "lastUpdated": "2026-02-23T11:41:06.546Z"
     }
   ],
-  "summary": {
-    "totalRepos": 2179,
-    "totalActive": 592,
-    "totalInactive": 1587
-  }
+  "trends": [
+    {
+      "date": "2026-02-23",
+      "AS-ASK-IT": 21,
+      "as-cloud-services": 136,
+      "asitservices": 813,
+      "axelspringer": 46,
+      "Media-Impact": 14,
+      "spring-media": 1149,
+      "welttv": 48
+    }
+  ]
 }
