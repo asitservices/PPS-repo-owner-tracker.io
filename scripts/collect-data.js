@@ -1,5 +1,6 @@
 /**
- * Repo Owner Tracker - Speichert nur INAKTIVE Repos - FIXED für richtige Struktur
+ * Repo Owner Tracker - ALLES in dashboard-data.json
+ * Speichert: Organizations + Trends + Inaktive Repos pro Org
  */
 
 const https = require('https');
@@ -157,16 +158,12 @@ async function collectData() {
   const nowIso = new Date().toISOString();
   const nowDateOnly = isoDateOnly(nowIso);
 
-  // WICHTIG: Speichere in docs/data/ (wo index.html auf zugreift)
   const dataDir = path.join(__dirname, '../docs/data');
   ensureDir(dataDir);
 
   const dashboardFile = path.join(dataDir, 'dashboard-data.json');
-  const detailFile = path.join(dataDir, 'repos-detail.json');
 
-  console.log('📁 Saving to:', dataDir);
-  console.log('📄 Dashboard:', dashboardFile);
-  console.log('📄 Details:', detailFile);
+  console.log('📁 Saving to:', dashboardFile);
   console.log('');
 
   // Lade existierende Daten für Trends
@@ -175,7 +172,6 @@ async function collectData() {
 
   const organizations = [];
   const trendEntry = { date: nowDateOnly };
-  const inactiveRepos = [];
 
   for (const org of ORGS) {
     console.log(`\n📦 ${org}`);
@@ -185,6 +181,7 @@ async function collectData() {
 
     let activeCount = 0;
     let inactiveCount = 0;
+    const inactiveRepos = [];  // Inaktive Repos für diese Org
 
     for (const repo of repos) {
       const repoOwnerValue = await getRepoOwnerValue(org, repo.name);
@@ -198,11 +195,9 @@ async function collectData() {
         console.log(`    ❌ INAKTIV: ${repo.name} (value: "${repoOwnerValue}")`);
         
         inactiveRepos.push({
-          org,
           repo: repo.name,
           url: `https://github.com/${org}/${repo.name}`,
-          repoOwner: repoOwnerValue,
-          isActive: false
+          repoOwner: repoOwnerValue
         });
       }
 
@@ -216,6 +211,7 @@ async function collectData() {
       totalRepos,
       activeRepos: activeCount,
       inactiveRepos: inactiveCount,
+      inactiveList: inactiveRepos,  // LISTE mit inaktiven Repos
       lastUpdated: nowIso
     });
 
@@ -232,7 +228,7 @@ async function collectData() {
     trends = trends.slice(-90);
   }
 
-  // Speichere Dashboard-Daten
+  // Speichere ALLES in dashboard-data.json
   const dashboardData = {
     generatedAt: nowIso,
     organizations,
@@ -242,16 +238,6 @@ async function collectData() {
   safeJsonWrite(dashboardFile, dashboardData);
   console.log(`✅ Saved: ${dashboardFile}`);
 
-  // Speichere NUR inaktive Repos
-  const detailData = {
-    generatedAt: nowIso,
-    totalInactive: inactiveRepos.length,
-    repos: inactiveRepos
-  };
-
-  safeJsonWrite(detailFile, detailData);
-  console.log(`✅ Saved: ${detailFile}`);
-
   console.log('\n═══════════════════════════════════════════════════════════');
   console.log('✅ Data collected!');
   console.log('═══════════════════════════════════════════════════════════');
@@ -260,18 +246,7 @@ async function collectData() {
     const pct = org.totalRepos > 0 ? Math.round((org.activeRepos / org.totalRepos) * 100) : 0;
     console.log(`   ${org.name}: ${org.totalRepos} total, ${org.activeRepos} aktiv (${pct}%), ${org.inactiveRepos} inaktiv`);
   });
-  console.log(`\n📁 Files:`);
-  console.log(`   ${dashboardFile}`);
-  console.log(`   ${detailFile}`);
-  console.log(`\n📊 Total inaktive repos saved: ${inactiveRepos.length}`);
-  
-  if (inactiveRepos.length > 0) {
-    console.log(`\n📝 First 3 inactive repos:`)
-    inactiveRepos.slice(0, 3).forEach(r => {
-      console.log(`   - ${r.org}/${r.repo} (${r.repoOwner})`);
-    });
-  }
-  
+  console.log(`\n📁 File: ${dashboardFile}`);
   console.log('═══════════════════════════════════════════════════════════\n');
 }
 
