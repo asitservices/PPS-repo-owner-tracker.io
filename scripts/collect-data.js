@@ -1,5 +1,5 @@
 /**
- * Repo Owner Tracker - Speichert nur INAKTIVE Repos - FIXED
+ * Repo Owner Tracker - Speichert nur INAKTIVE Repos - FIXED für richtige Struktur
  */
 
 const https = require('https');
@@ -157,11 +157,17 @@ async function collectData() {
   const nowIso = new Date().toISOString();
   const nowDateOnly = isoDateOnly(nowIso);
 
+  // WICHTIG: Speichere in docs/data/ (wo index.html auf zugreift)
   const dataDir = path.join(__dirname, '../docs/data');
   ensureDir(dataDir);
 
   const dashboardFile = path.join(dataDir, 'dashboard-data.json');
   const detailFile = path.join(dataDir, 'repos-detail.json');
+
+  console.log('📁 Saving to:', dataDir);
+  console.log('📄 Dashboard:', dashboardFile);
+  console.log('📄 Details:', detailFile);
+  console.log('');
 
   // Lade existierende Daten für Trends
   const existingData = safeJsonRead(dashboardFile, { organizations: [], trends: [] });
@@ -169,7 +175,7 @@ async function collectData() {
 
   const organizations = [];
   const trendEntry = { date: nowDateOnly };
-  const inactiveRepos = [];  // NUR inaktive Repos
+  const inactiveRepos = [];
 
   for (const org of ORGS) {
     console.log(`\n📦 ${org}`);
@@ -189,11 +195,8 @@ async function collectData() {
         activeCount++;
       } else {
         inactiveCount++;
-        
-        // DEBUG: Zeige was als inaktiv erkannt wurde
         console.log(`    ❌ INAKTIV: ${repo.name} (value: "${repoOwnerValue}")`);
         
-        // NUR inaktive Repos speichern
         inactiveRepos.push({
           org,
           repo: repo.name,
@@ -203,7 +206,6 @@ async function collectData() {
         });
       }
 
-      // Kleine Pause zwischen Requests
       await sleep(50);
     }
 
@@ -217,7 +219,6 @@ async function collectData() {
       lastUpdated: nowIso
     });
 
-    // Für Trends: speichere totalRepos
     trendEntry[org] = totalRepos;
 
     console.log(`\n  ✅ ${org}: ${totalRepos} total, ${activeCount} aktiv, ${inactiveCount} inaktiv\n`);
@@ -239,6 +240,7 @@ async function collectData() {
   };
 
   safeJsonWrite(dashboardFile, dashboardData);
+  console.log(`✅ Saved: ${dashboardFile}`);
 
   // Speichere NUR inaktive Repos
   const detailData = {
@@ -248,8 +250,9 @@ async function collectData() {
   };
 
   safeJsonWrite(detailFile, detailData);
+  console.log(`✅ Saved: ${detailFile}`);
 
-  console.log('\n══════════════════════════════════════════════════════════��');
+  console.log('\n═══════════════════════════════════════════════════════════');
   console.log('✅ Data collected!');
   console.log('═══════════════════════════════════════════════════════════');
   console.log(`\n📊 Summary:`);
@@ -262,7 +265,6 @@ async function collectData() {
   console.log(`   ${detailFile}`);
   console.log(`\n📊 Total inaktive repos saved: ${inactiveRepos.length}`);
   
-  // DEBUG: Zeige ein Beispiel
   if (inactiveRepos.length > 0) {
     console.log(`\n📝 First 3 inactive repos:`)
     inactiveRepos.slice(0, 3).forEach(r => {
