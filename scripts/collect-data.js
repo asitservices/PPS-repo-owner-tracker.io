@@ -1,5 +1,5 @@
 /**
- * Repo Owner Tracker - SIMPLE VERSION (ohne Concurrency-Fehler)
+ * Repo Owner Tracker - KORREKTES FORMAT für Website
  */
 
 const https = require('https');
@@ -26,6 +26,15 @@ function ensureDir(dirPath) {
   if (!fs.existsSync(dirPath)) fs.mkdirSync(dirPath, { recursive: true });
 }
 
+function safeJsonRead(filePath, fallback) {
+  try {
+    if (!fs.existsSync(filePath)) return fallback;
+    return JSON.parse(fs.readFileSync(filePath, 'utf8'));
+  } catch {
+    return fallback;
+  }
+}
+
 function safeJsonWrite(filePath, obj) {
   fs.writeFileSync(filePath, JSON.stringify(obj, null, 2));
 }
@@ -36,37 +45,18 @@ function isoDateOnly(iso) {
 
 // ===== CORE LOGIC =====
 
-/**
- * Prüft ob RepoOwner NICHT AKTIV ist
- */
 function isInactive(value) {
-  console.log(`    Check: "${value}" -> `, end='');
-  
-  if (value === null || value === undefined) {
-    console.log('NICHT AKTIV (null)');
-    return true;
-  }
+  if (value === null || value === undefined) return true;
 
   const s = String(value).trim();
 
-  if (s === '') {
-    console.log('NICHT AKTIV (leer)');
-    return true;
-  }
+  if (s === '') return true;
 
   const lower = s.toLowerCase();
 
-  if (lower === 'please choose a valid option!') {
-    console.log('NICHT AKTIV (placeholder)');
-    return true;
-  }
+  if (lower === 'please choose a valid option!') return true;
+  if (lower === 'default' || lower.startsWith('default')) return true;
 
-  if (lower === 'default' || lower.startsWith('default')) {
-    console.log('NICHT AKTIV (default)');
-    return true;
-  }
-
-  console.log(`AKTIV ("${value}")`);
   return false;
 }
 
@@ -90,6 +80,7 @@ function makeRequest(url) {
         resolve({
           success: res.statusCode >= 200 && res.statusCode < 300,
           status: res.statusCode,
+          headers: res.headers,
           data: parsed
         });
       });
@@ -147,7 +138,7 @@ async function getRepoOwnerValue(org, repo) {
   }
 
   const prop = result.data.find(p => p.property_name === 'RepoOwner');
-  
+
   if (!prop) {
     return null;
   }
@@ -164,14 +155,19 @@ async function collectData() {
   }
 
   const nowIso = new Date().toISOString();
+  const nowDateOnly = isoDateOnly(nowIso);
 
   const dataDir = path.join(__dirname, '../docs/data');
   ensureDir(dataDir);
 
   const dashboardFile = path.join(dataDir, 'dashboard-data.json');
 
+  // Lade existierende Daten für Trends
+  const existingData = safeJsonRead(dashboardFile, { organizations: [], trends: [] });
+  let trends = Array.isArray(existingData.trends) ? existingData.trends : [];
+
   const organizations = [];
-  const allReposDetail = [];
+  const trendEntry = { date: nowDateOnly };
 
   for (const org of ORGS) {
     console.log(`\n📦 ${org}`);
@@ -190,14 +186,6 @@ async function collectData() {
         activeCount++;
       }
 
-      allReposDetail.push({
-        org,
-        repo: repo.name,
-        url: `https://github.com/${org}/${repo.name}`,
-        repoOwner: repoOwnerValue,
-        isActive: active
-      });
-
       // Kleine Pause zwischen Requests
       await sleep(50);
     }
@@ -213,27 +201,37 @@ async function collectData() {
       lastUpdated: nowIso
     });
 
-    console.log(`\n  ✅ ${org}: ${totalRepos} total (ohne archiv), ${activeCount} aktiv (RepoOwner != default/leer)\n`);
+    // Für Trends: speichere totalRepos
+    trendEntry[org] = totalRepos;
+
+    console.log(`  ✅ ${org}: ${totalRepos} total (ohne archiv), ${activeCount} aktiv (RepoOwner != default/leer)\n`);
   }
 
-  // Speichere Dashboard
-  safeJsonWrite(dashboardFile, {
+  // Füge neuen Trend-Eintrag hinzu
+  trends.push(trendEntry);
+
+  // Behalte nur die letzten 90 Tage
+  if (trends.length > 90) {
+    trends = trends.slice(-90);
+  }
+
+  // Speichere mit dem RICHTIGEN FORMAT für die Website
+  const dashboardData = {
     generatedAt: nowIso,
     organizations,
-    summary: {
-      totalRepos: allReposDetail.length,
-      totalActive: allReposDetail.filter(r => r.isActive).length,
-      totalInactive: allReposDetail.filter(r => !r.isActive).length
-    }
-  });
+    trends
+  };
+
+  safeJsonWrite(dashboardFile, dashboardData);
 
   console.log('\n═══════════════════════════════════════════════════════════');
   console.log('✅ Data collected!');
   console.log('═══════════════════════════════════════════════════════════');
   console.log(`\n📊 Summary:`);
-  console.log(`   Total Repos: ${allReposDetail.length}`);
-  console.log(`   ✅ Aktiv: ${allReposDetail.filter(r => r.isActive).length}`);
-  console.log(`   ❌ Nicht Aktiv: ${allReposDetail.filter(r => !r.isActive).length}`);
+  organizations.forEach(org => {
+    const pct = org.totalRepos > 0 ? Math.round((org.activeRepos / org.totalRepos) * 100) : 0;
+    console.log(`   ${org.name}: ${org.totalRepos} total, ${org.activeRepos} aktiv (${pct}%)`);
+  });
   console.log(`\n📁 File: ${dashboardFile}`);
   console.log('═══════════════════════════════════════════════════════════\n');
 }
