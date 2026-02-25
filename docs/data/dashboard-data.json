@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-02-25T00:44:14.365Z",
+  "generatedAt": "2026-02-25T09:19:13.848Z",
   "organizations": [
     {
       "name": "AS-ASK-IT",
@@ -113,7 +113,7 @@
           "repoOwner": "Please choose a valid option!"
         }
       ],
-      "lastUpdated": "2026-02-25T00:44:14.365Z"
+      "lastUpdated": "2026-02-25T09:19:13.848Z"
     },
     {
       "name": "as-cloud-services",
@@ -292,13 +292,13 @@
           "repoOwner": "Please choose a valid option!"
         }
       ],
-      "lastUpdated": "2026-02-25T00:44:14.365Z"
+      "lastUpdated": "2026-02-25T09:19:13.848Z"
     },
     {
       "name": "asitservices",
-      "totalRepos": 814,
-      "activeRepos": 344,
-      "inactiveRepos": 470,
+      "totalRepos": 776,
+      "activeRepos": 361,
+      "inactiveRepos": 415,
       "inactiveList": [
         {
           "repo": "ins-cd-terraform-aws-account-asit-security-controls",
@@ -411,11 +411,6 @@
           "repoOwner": "Please choose a valid option!"
         },
         {
-          "repo": "aws-account-baseline",
-          "url": "https://github.com/asitservices/aws-account-baseline",
-          "repoOwner": "Please choose a valid option!"
-        },
-        {
           "repo": "ansible-woodwing-old",
           "url": "https://github.com/asitservices/ansible-woodwing-old",
           "repoOwner": "Please choose a valid option!"
@@ -496,11 +491,6 @@
           "repoOwner": "Please choose a valid option!"
         },
         {
-          "repo": "aws-as-transit",
-          "url": "https://github.com/asitservices/aws-as-transit",
-          "repoOwner": "Please choose a valid option!"
-        },
-        {
           "repo": "angebotsliste_discard",
           "url": "https://github.com/asitservices/angebotsliste_discard",
           "repoOwner": "Please choose a valid option!"
@@ -538,11 +528,6 @@
         {
           "repo": "azure-network-config",
           "url": "https://github.com/asitservices/azure-network-config",
-          "repoOwner": "Please choose a valid option!"
-        },
-        {
-          "repo": "aws-azure-login",
-          "url": "https://github.com/asitservices/aws-azure-login",
           "repoOwner": "Please choose a valid option!"
         },
         {
@@ -1326,11 +1311,6 @@
           "repoOwner": "Please choose a valid option!"
         },
         {
-          "repo": "ec_visono-data_migration",
-          "url": "https://github.com/asitservices/ec_visono-data_migration",
-          "repoOwner": "Please choose a valid option!"
-        },
-        {
           "repo": "ins-cd-spacewalk",
           "url": "https://github.com/asitservices/ins-cd-spacewalk",
           "repoOwner": "Please choose a valid option!"
@@ -1356,11 +1336,6 @@
           "repoOwner": "Please choose a valid option!"
         },
         {
-          "repo": "ec_cueprint-veeam",
-          "url": "https://github.com/asitservices/ec_cueprint-veeam",
-          "repoOwner": "Please choose a valid option!"
-        },
-        {
           "repo": "zs_sammelpaket_packages",
           "url": "https://github.com/asitservices/zs_sammelpaket_packages",
           "repoOwner": "Please choose a valid option!"
@@ -1378,11 +1353,6 @@
         {
           "repo": "assyn_accounting-scripts",
           "url": "https://github.com/asitservices/assyn_accounting-scripts",
-          "repoOwner": "Please choose a valid option!"
-        },
-        {
-          "repo": "aws-asit-clouddata-playground",
-          "url": "https://github.com/asitservices/aws-asit-clouddata-playground",
           "repoOwner": "Please choose a valid option!"
         },
         {
@@ -1436,11 +1406,6 @@
           "repoOwner": "Please choose a valid option!"
         },
         {
-          "repo": "LSP.Lastschriftpruefer",
-          "url": "https://github.com/asitservices/LSP.Lastschriftpruefer",
-          "repoOwner": "Please choose a valid option!"
-        },
-        {
           "repo": "ins-cd-vcenter-connect",
           "url": "https://github.com/asitservices/ins-cd-vcenter-connect",
           "repoOwner": "Please choose a valid option!"
@@ -1453,11 +1418,6 @@
         {
           "repo": "as-sfdc-ask",
           "url": "https://github.com/asitservices/as-sfdc-ask",
-          "repoOwner": "Please choose a valid option!"
-        },
-        {
-          "repo": "ec_mimir-ansible",
-          "url": "https://github.com/asitservices/ec_mimir-ansible",
           "repoOwner": "Please choose a valid option!"
         },
         {
@@ -1528,11 +1488,6 @@
         {
           "repo": "ins-cd-adr",
           "url": "https://github.com/asitservices/ins-cd-adr",
-          "repoOwner": "Please choose a valid option!"
-        },
-        {
-          "repo": "ec_octopus-ansible",
-          "url": "https://github.com/asitservices/ec_octopus-ansible",
           "repoOwner": "Please choose a valid option!"
         },
         {
@@ -1666,11 +1621,6 @@
           "repoOwner": "Please choose a valid option!"
         },
         {
-          "repo": "terraform-github-cloud-and-data",
-          "url": "https://github.com/asitservices/terraform-github-cloud-and-data",
-          "repoOwner": "Please choose a valid option!"
-        },
-        {
           "repo": "colla_dennis_spielwiese",
           "url": "https://github.com/asitservices/colla_dennis_spielwiese",
           "repoOwner": "Please choose a valid option!"
@@ -1746,11 +1696,6 @@
           "repoOwner": "Please choose a valid option!"
         },
         {
-          "repo": "aws-as-asit-sso-test",
-          "url": "https://github.com/asitservices/aws-as-asit-sso-test",
-          "repoOwner": "Please choose a valid option!"
-        },
-        {
           "repo": "docker-terraform",
           "url": "https://github.com/asitservices/docker-terraform",
           "repoOwner": "Please choose a valid option!"
@@ -1796,11 +1741,6 @@
           "repoOwner": "Please choose a valid option!"
         },
         {
-          "repo": "aws-as-asit-sso",
-          "url": "https://github.com/asitservices/aws-as-asit-sso",
-          "repoOwner": "Please choose a valid option!"
-        },
-        {
           "repo": "aws-as-asit-vh-ins",
           "url": "https://github.com/asitservices/aws-as-asit-vh-ins",
           "repoOwner": "Please choose a valid option!"
@@ -1818,36 +1758,6 @@
         {
           "repo": "as-mulesoft-xl-subscription-api",
           "url": "https://github.com/asitservices/as-mulesoft-xl-subscription-api",
-          "repoOwner": "Please choose a valid option!"
-        },
-        {
-          "repo": "As.It.Ses.Frameworks",
-          "url": "https://github.com/asitservices/As.It.Ses.Frameworks",
-          "repoOwner": "Please choose a valid option!"
-        },
-        {
-          "repo": "As.It.Ses.Libraries",
-          "url": "https://github.com/asitservices/As.It.Ses.Libraries",
-          "repoOwner": "Please choose a valid option!"
-        },
-        {
-          "repo": "As.It.Ses.Misc",
-          "url": "https://github.com/asitservices/As.It.Ses.Misc",
-          "repoOwner": "Please choose a valid option!"
-        },
-        {
-          "repo": "As.It.Ses.Testcases",
-          "url": "https://github.com/asitservices/As.It.Ses.Testcases",
-          "repoOwner": "Please choose a valid option!"
-        },
-        {
-          "repo": "As.It.Ses.Apps",
-          "url": "https://github.com/asitservices/As.It.Ses.Apps",
-          "repoOwner": "Please choose a valid option!"
-        },
-        {
-          "repo": "terragrunt-aws-github-runner-cloud-data",
-          "url": "https://github.com/asitservices/terragrunt-aws-github-runner-cloud-data",
           "repoOwner": "Please choose a valid option!"
         },
         {
@@ -1896,51 +1806,6 @@
           "repoOwner": "Please choose a valid option!"
         },
         {
-          "repo": "bot_bzv_reklaantworten",
-          "url": "https://github.com/asitservices/bot_bzv_reklaantworten",
-          "repoOwner": "Please choose a valid option!"
-        },
-        {
-          "repo": "bot_glp",
-          "url": "https://github.com/asitservices/bot_glp",
-          "repoOwner": "Please choose a valid option!"
-        },
-        {
-          "repo": "bot_create_order",
-          "url": "https://github.com/asitservices/bot_create_order",
-          "repoOwner": "Please choose a valid option!"
-        },
-        {
-          "repo": "bot_invoicing",
-          "url": "https://github.com/asitservices/bot_invoicing",
-          "repoOwner": "Please choose a valid option!"
-        },
-        {
-          "repo": "bot_netchange",
-          "url": "https://github.com/asitservices/bot_netchange",
-          "repoOwner": "Please choose a valid option!"
-        },
-        {
-          "repo": "bot_osp_testdata",
-          "url": "https://github.com/asitservices/bot_osp_testdata",
-          "repoOwner": "Please choose a valid option!"
-        },
-        {
-          "repo": "bot_syma_sost",
-          "url": "https://github.com/asitservices/bot_syma_sost",
-          "repoOwner": "Please choose a valid option!"
-        },
-        {
-          "repo": "bot_transaction_checker",
-          "url": "https://github.com/asitservices/bot_transaction_checker",
-          "repoOwner": "Please choose a valid option!"
-        },
-        {
-          "repo": "bot_zfmta_rar",
-          "url": "https://github.com/asitservices/bot_zfmta_rar",
-          "repoOwner": "Please choose a valid option!"
-        },
-        {
           "repo": "pmaclient",
           "url": "https://github.com/asitservices/pmaclient",
           "repoOwner": "Please choose a valid option!"
@@ -1981,11 +1846,6 @@
           "repoOwner": "Please choose a valid option!"
         },
         {
-          "repo": "portal_scrum_poker",
-          "url": "https://github.com/asitservices/portal_scrum_poker",
-          "repoOwner": "Please choose a valid option!"
-        },
-        {
           "repo": "ww_server_packages",
           "url": "https://github.com/asitservices/ww_server_packages",
           "repoOwner": "Please choose a valid option!"
@@ -2016,11 +1876,6 @@
           "repoOwner": "Please choose a valid option!"
         },
         {
-          "repo": "sso_ses_server",
-          "url": "https://github.com/asitservices/sso_ses_server",
-          "repoOwner": "Please choose a valid option!"
-        },
-        {
           "repo": "ins-cd-tsmdb",
           "url": "https://github.com/asitservices/ins-cd-tsmdb",
           "repoOwner": "Please choose a valid option!"
@@ -2033,16 +1888,6 @@
         {
           "repo": "Mail_EmailEvents_Reporting",
           "url": "https://github.com/asitservices/Mail_EmailEvents_Reporting",
-          "repoOwner": "Please choose a valid option!"
-        },
-        {
-          "repo": "server_web_api",
-          "url": "https://github.com/asitservices/server_web_api",
-          "repoOwner": "Please choose a valid option!"
-        },
-        {
-          "repo": "api_scrum_poker",
-          "url": "https://github.com/asitservices/api_scrum_poker",
           "repoOwner": "Please choose a valid option!"
         },
         {
@@ -2131,16 +1976,6 @@
           "repoOwner": "Please choose a valid option!"
         },
         {
-          "repo": "web_frontend",
-          "url": "https://github.com/asitservices/web_frontend",
-          "repoOwner": "Please choose a valid option!"
-        },
-        {
-          "repo": "ses_portal",
-          "url": "https://github.com/asitservices/ses_portal",
-          "repoOwner": "Please choose a valid option!"
-        },
-        {
           "repo": "vh-migration",
           "url": "https://github.com/asitservices/vh-migration",
           "repoOwner": "Please choose a valid option!"
@@ -2161,11 +1996,6 @@
           "repoOwner": "Please choose a valid option!"
         },
         {
-          "repo": "ec_mimir_nodered_instanz2",
-          "url": "https://github.com/asitservices/ec_mimir_nodered_instanz2",
-          "repoOwner": "Please choose a valid option!"
-        },
-        {
           "repo": "Correct-GroupMembership",
           "url": "https://github.com/asitservices/Correct-GroupMembership",
           "repoOwner": "Please choose a valid option!"
@@ -2178,11 +2008,6 @@
         {
           "repo": "ec_mimir_nodered_prod_housekeeping",
           "url": "https://github.com/asitservices/ec_mimir_nodered_prod_housekeeping",
-          "repoOwner": "Please choose a valid option!"
-        },
-        {
-          "repo": "ec_fotoware-google_vision",
-          "url": "https://github.com/asitservices/ec_fotoware-google_vision",
           "repoOwner": "Please choose a valid option!"
         },
         {
@@ -2213,11 +2038,6 @@
         {
           "repo": "as-0365-spo-versioncleaner",
           "url": "https://github.com/asitservices/as-0365-spo-versioncleaner",
-          "repoOwner": "Please choose a valid option!"
-        },
-        {
-          "repo": "bot_cic_basics",
-          "url": "https://github.com/asitservices/bot_cic_basics",
           "repoOwner": "Please choose a valid option!"
         },
         {
@@ -2296,11 +2116,6 @@
           "repoOwner": "Please choose a valid option!"
         },
         {
-          "repo": "almServerWatchDog",
-          "url": "https://github.com/asitservices/almServerWatchDog",
-          "repoOwner": "Please choose a valid option!"
-        },
-        {
           "repo": "asit-cise-api",
           "url": "https://github.com/asitservices/asit-cise-api",
           "repoOwner": "Please choose a valid option!"
@@ -2351,11 +2166,6 @@
           "repoOwner": "Please choose a valid option!"
         },
         {
-          "repo": "jez",
-          "url": "https://github.com/asitservices/jez",
-          "repoOwner": "Please choose a valid option!"
-        },
-        {
           "repo": "AzureFileProjektMigrationScripts",
           "url": "https://github.com/asitservices/AzureFileProjektMigrationScripts",
           "repoOwner": "Please choose a valid option!"
@@ -2401,11 +2211,6 @@
           "repoOwner": "Please choose a valid option!"
         },
         {
-          "repo": "ansible-awsmig",
-          "url": "https://github.com/asitservices/ansible-awsmig",
-          "repoOwner": "Please choose a valid option!"
-        },
-        {
           "repo": "profitcenter",
           "url": "https://github.com/asitservices/profitcenter",
           "repoOwner": "Please choose a valid option!"
@@ -2421,16 +2226,6 @@
           "repoOwner": "Please choose a valid option!"
         },
         {
-          "repo": "mail_sender_for_uft",
-          "url": "https://github.com/asitservices/mail_sender_for_uft",
-          "repoOwner": "Please choose a valid option!"
-        },
-        {
-          "repo": "as_python_tools",
-          "url": "https://github.com/asitservices/as_python_tools",
-          "repoOwner": "Please choose a valid option!"
-        },
-        {
           "repo": "ansible-environment",
           "url": "https://github.com/asitservices/ansible-environment",
           "repoOwner": "Please choose a valid option!"
@@ -2438,11 +2233,6 @@
         {
           "repo": "con-collection",
           "url": "https://github.com/asitservices/con-collection",
-          "repoOwner": "Please choose a valid option!"
-        },
-        {
-          "repo": "aws-chargeback",
-          "url": "https://github.com/asitservices/aws-chargeback",
           "repoOwner": "Please choose a valid option!"
         },
         {
@@ -2471,11 +2261,6 @@
           "repoOwner": "Please choose a valid option!"
         },
         {
-          "repo": "GitHubBackup",
-          "url": "https://github.com/asitservices/GitHubBackup",
-          "repoOwner": "Please choose a valid option!"
-        },
-        {
           "repo": "monorepo_SAPUI5",
           "url": "https://github.com/asitservices/monorepo_SAPUI5",
           "repoOwner": "Please choose a valid option!"
@@ -2501,11 +2286,6 @@
           "repoOwner": "Please choose a valid option!"
         },
         {
-          "repo": "ec_NextDam_PS_Plugin",
-          "url": "https://github.com/asitservices/ec_NextDam_PS_Plugin",
-          "repoOwner": "Please choose a valid option!"
-        },
-        {
           "repo": "migrationScriptsV8",
           "url": "https://github.com/asitservices/migrationScriptsV8",
           "repoOwner": "Please choose a valid option!"
@@ -2516,33 +2296,13 @@
           "repoOwner": "Please choose a valid option!"
         },
         {
-          "repo": "ec_mimir_lambda_webhookmanager",
-          "url": "https://github.com/asitservices/ec_mimir_lambda_webhookmanager",
-          "repoOwner": "Please choose a valid option!"
-        },
-        {
-          "repo": "ec_mimir_upload_app",
-          "url": "https://github.com/asitservices/ec_mimir_upload_app",
-          "repoOwner": "Please choose a valid option!"
-        },
-        {
           "repo": "ec_interred_aws_bild_custom",
           "url": "https://github.com/asitservices/ec_interred_aws_bild_custom",
           "repoOwner": "Please choose a valid option!"
         },
         {
-          "repo": "ec_imagepool_ps_plugin",
-          "url": "https://github.com/asitservices/ec_imagepool_ps_plugin",
-          "repoOwner": "Please choose a valid option!"
-        },
-        {
           "repo": "patanaa",
           "url": "https://github.com/asitservices/patanaa",
-          "repoOwner": "Please choose a valid option!"
-        },
-        {
-          "repo": "ec_NextDAM_infra",
-          "url": "https://github.com/asitservices/ec_NextDAM_infra",
           "repoOwner": "Please choose a valid option!"
         },
         {
@@ -2561,43 +2321,13 @@
           "repoOwner": "Please choose a valid option!"
         },
         {
-          "repo": "ec_minio-ssl_certificates",
-          "url": "https://github.com/asitservices/ec_minio-ssl_certificates",
-          "repoOwner": "Please choose a valid option!"
-        },
-        {
           "repo": "asmount",
           "url": "https://github.com/asitservices/asmount",
           "repoOwner": "Please choose a valid option!"
         },
         {
-          "repo": "Salesforce_FSW",
-          "url": "https://github.com/asitservices/Salesforce_FSW",
-          "repoOwner": "Please choose a valid option!"
-        },
-        {
-          "repo": "Salesforce_Services",
-          "url": "https://github.com/asitservices/Salesforce_Services",
-          "repoOwner": "Please choose a valid option!"
-        },
-        {
-          "repo": "Salesforce_SRC",
-          "url": "https://github.com/asitservices/Salesforce_SRC",
-          "repoOwner": "Please choose a valid option!"
-        },
-        {
-          "repo": "salesforce_mi",
-          "url": "https://github.com/asitservices/salesforce_mi",
-          "repoOwner": "Please choose a valid option!"
-        },
-        {
           "repo": "FreelancerApp_INTER",
           "url": "https://github.com/asitservices/FreelancerApp_INTER",
-          "repoOwner": "Please choose a valid option!"
-        },
-        {
-          "repo": "ec_mft-userdata-int",
-          "url": "https://github.com/asitservices/ec_mft-userdata-int",
           "repoOwner": "Please choose a valid option!"
         },
         {
@@ -2636,11 +2366,6 @@
           "repoOwner": "Please choose a valid option!"
         },
         {
-          "repo": "ec_indesign_mimir_plugin",
-          "url": "https://github.com/asitservices/ec_indesign_mimir_plugin",
-          "repoOwner": "Please choose a valid option!"
-        },
-        {
           "repo": "aifocus-ocr-api",
           "url": "https://github.com/asitservices/aifocus-ocr-api",
           "repoOwner": "Please choose a valid option!"
@@ -2651,7 +2376,7 @@
           "repoOwner": "Please choose a valid option!"
         }
       ],
-      "lastUpdated": "2026-02-25T00:44:14.365Z"
+      "lastUpdated": "2026-02-25T09:19:13.848Z"
     },
     {
       "name": "axelspringer",
@@ -2890,7 +2615,7 @@
           "repoOwner": "Please choose a valid option! "
         }
       ],
-      "lastUpdated": "2026-02-25T00:44:14.365Z"
+      "lastUpdated": "2026-02-25T09:19:13.848Z"
     },
     {
       "name": "Media-Impact",
@@ -2898,13 +2623,13 @@
       "activeRepos": 14,
       "inactiveRepos": 0,
       "inactiveList": [],
-      "lastUpdated": "2026-02-25T00:44:14.365Z"
+      "lastUpdated": "2026-02-25T09:19:13.848Z"
     },
     {
       "name": "spring-media",
       "totalRepos": 1147,
-      "activeRepos": 1121,
-      "inactiveRepos": 26,
+      "activeRepos": 1122,
+      "inactiveRepos": 25,
       "inactiveList": [
         {
           "repo": "DeepPhonemizer",
@@ -2924,11 +2649,6 @@
         {
           "repo": "semantic-release-ci-test",
           "url": "https://github.com/spring-media/semantic-release-ci-test",
-          "repoOwner": "Please choose a valid option!  "
-        },
-        {
-          "repo": "kube-image-keeper",
-          "url": "https://github.com/spring-media/kube-image-keeper",
           "repoOwner": "Please choose a valid option!  "
         },
         {
@@ -3037,7 +2757,7 @@
           "repoOwner": "Please choose a valid option!  "
         }
       ],
-      "lastUpdated": "2026-02-25T00:44:14.365Z"
+      "lastUpdated": "2026-02-25T09:19:13.848Z"
     },
     {
       "name": "welttv",
@@ -3286,7 +3006,7 @@
           "repoOwner": "Please choose a valid option!"
         }
       ],
-      "lastUpdated": "2026-02-25T00:44:14.365Z"
+      "lastUpdated": "2026-02-25T09:19:13.848Z"
     },
     {
       "name": "sales-impact",
@@ -3294,7 +3014,7 @@
       "activeRepos": 151,
       "inactiveRepos": 0,
       "inactiveList": [],
-      "lastUpdated": "2026-02-25T00:44:14.365Z"
+      "lastUpdated": "2026-02-25T09:19:13.848Z"
     }
   ],
   "trends": [
@@ -3418,6 +3138,17 @@
       "AS-ASK-IT": 21,
       "as-cloud-services": 35,
       "asitservices": 814,
+      "axelspringer": 46,
+      "Media-Impact": 14,
+      "spring-media": 1147,
+      "welttv": 48,
+      "sales-impact": 151
+    },
+    {
+      "date": "2026-02-25",
+      "AS-ASK-IT": 21,
+      "as-cloud-services": 35,
+      "asitservices": 776,
       "axelspringer": 46,
       "Media-Impact": 14,
       "spring-media": 1147,
