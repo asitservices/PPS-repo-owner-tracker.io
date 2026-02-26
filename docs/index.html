@@ -286,16 +286,26 @@
                     }
                 });
 
-                // Percent Chart
+                // Percent Chart - historische Prozente aus Trends berechnen
                 const percentDatasets = orgs.map((org, i) => {
-                    const orgNow = dashboardData.organizations.find(o => o.name === org);
-                    const pct = orgNow && orgNow.totalRepos > 0
-                        ? ((orgNow.activeRepos || 0) / orgNow.totalRepos) * 100
-                        : 0;
+                    const data = dashboardData.trends.map(t => {
+                        const total = t[org] || 0;
+                        const active = t[`${org}_active`];
+                        // Wenn _active Daten vorhanden, berechne echten Prozentsatz
+                        if (active !== undefined && total > 0) {
+                            return Number(((active / total) * 100).toFixed(2));
+                        }
+                        // Fallback für alte Daten ohne _active: nutze aktuellen Stand
+                        const orgNow = dashboardData.organizations.find(o => o.name === org);
+                        if (orgNow && orgNow.totalRepos > 0) {
+                            return Number(((orgNow.activeRepos || 0) / orgNow.totalRepos * 100).toFixed(2));
+                        }
+                        return 0;
+                    });
 
                     return {
                         label: org,
-                        data: dates.map(() => Number(pct.toFixed(2))),
+                        data,
                         borderColor: colors[i % colors.length],
                         backgroundColor: colors[i % colors.length] + '20',
                         tension: 0.3,

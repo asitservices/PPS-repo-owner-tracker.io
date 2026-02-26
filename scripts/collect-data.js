@@ -278,6 +278,7 @@ async function collectData() {
     });
 
     trendEntry[org] = totalRepos;
+    trendEntry[`${org}_active`] = activeCount;
 
     console.log(`\n  ✅ ${org}: ${totalRepos} total, ${activeCount} aktiv, ${inactiveCount} inaktiv\n`);
   }
