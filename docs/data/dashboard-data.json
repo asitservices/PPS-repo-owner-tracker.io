@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-03-06T00:44:11.723Z",
+  "generatedAt": "2026-03-06T09:12:48.789Z",
   "organizations": [
     {
       "name": "AS-ASK-IT",
@@ -7,7 +7,7 @@
       "activeRepos": 21,
       "inactiveRepos": 0,
       "inactiveList": [],
-      "lastUpdated": "2026-03-06T00:44:11.723Z"
+      "lastUpdated": "2026-03-06T09:12:48.789Z"
     },
     {
       "name": "as-cloud-services",
@@ -15,7 +15,7 @@
       "activeRepos": 35,
       "inactiveRepos": 0,
       "inactiveList": [],
-      "lastUpdated": "2026-03-06T00:44:11.723Z"
+      "lastUpdated": "2026-03-06T09:12:48.789Z"
     },
     {
       "name": "asitservices",
@@ -1384,136 +1384,15 @@
           "repoOwner": "Please choose a valid option!"
         }
       ],
-      "lastUpdated": "2026-03-06T00:44:11.723Z"
+      "lastUpdated": "2026-03-06T09:12:48.789Z"
     },
     {
       "name": "axelspringer",
-      "totalRepos": 26,
-      "activeRepos": 2,
-      "inactiveRepos": 24,
-      "inactiveList": [
-        {
-          "repo": "tech-radar",
-          "url": "https://github.com/axelspringer/tech-radar",
-          "repoOwner": "Please choose a valid option! "
-        },
-        {
-          "repo": "bild-techradar",
-          "url": "https://github.com/axelspringer/bild-techradar",
-          "repoOwner": "Please choose a valid option! "
-        },
-        {
-          "repo": "wp-mango",
-          "url": "https://github.com/axelspringer/wp-mango",
-          "repoOwner": "Please choose a valid option! "
-        },
-        {
-          "repo": "wp-axelspringer-theme",
-          "url": "https://github.com/axelspringer/wp-axelspringer-theme",
-          "repoOwner": "Please choose a valid option! "
-        },
-        {
-          "repo": "wp-mashshare-fblikebar",
-          "url": "https://github.com/axelspringer/wp-mashshare-fblikebar",
-          "repoOwner": "Please choose a valid option! "
-        },
-        {
-          "repo": "wp-mashshare-google-analytics",
-          "url": "https://github.com/axelspringer/wp-mashshare-google-analytics",
-          "repoOwner": "Please choose a valid option! "
-        },
-        {
-          "repo": "wp-mashshare-likeaftershare",
-          "url": "https://github.com/axelspringer/wp-mashshare-likeaftershare",
-          "repoOwner": "Please choose a valid option! "
-        },
-        {
-          "repo": "wp-mashshare-networks",
-          "url": "https://github.com/axelspringer/wp-mashshare-networks",
-          "repoOwner": "Please choose a valid option! "
-        },
-        {
-          "repo": "wp-mashshare-pageviews",
-          "url": "https://github.com/axelspringer/wp-mashshare-pageviews",
-          "repoOwner": "Please choose a valid option! "
-        },
-        {
-          "repo": "wp-mashshare-performance-widget",
-          "url": "https://github.com/axelspringer/wp-mashshare-performance-widget",
-          "repoOwner": "Please choose a valid option! "
-        },
-        {
-          "repo": "wp-mashshare-responsive",
-          "url": "https://github.com/axelspringer/wp-mashshare-responsive",
-          "repoOwner": "Please choose a valid option! "
-        },
-        {
-          "repo": "wp-mashshare-select-and-share",
-          "url": "https://github.com/axelspringer/wp-mashshare-select-and-share",
-          "repoOwner": "Please choose a valid option! "
-        },
-        {
-          "repo": "wp-mashshare-sharebar",
-          "url": "https://github.com/axelspringer/wp-mashshare-sharebar",
-          "repoOwner": "Please choose a valid option! "
-        },
-        {
-          "repo": "wp-mashsharer",
-          "url": "https://github.com/axelspringer/wp-mashsharer",
-          "repoOwner": "Please choose a valid option! "
-        },
-        {
-          "repo": "wp-polylang-pro",
-          "url": "https://github.com/axelspringer/wp-polylang-pro",
-          "repoOwner": "Please choose a valid option! "
-        },
-        {
-          "repo": "wp-ultimate-recipe-premium",
-          "url": "https://github.com/axelspringer/wp-ultimate-recipe-premium",
-          "repoOwner": "Please choose a valid option! "
-        },
-        {
-          "repo": "wp-schema",
-          "url": "https://github.com/axelspringer/wp-schema",
-          "repoOwner": "Please choose a valid option! "
-        },
-        {
-          "repo": "wp-dynamic-featured-image",
-          "url": "https://github.com/axelspringer/wp-dynamic-featured-image",
-          "repoOwner": "Please choose a valid option! "
-        },
-        {
-          "repo": "wp-bitmovin-player",
-          "url": "https://github.com/axelspringer/wp-bitmovin-player",
-          "repoOwner": "Please choose a valid option! "
-        },
-        {
-          "repo": "wp-programmatic-ad-sales",
-          "url": "https://github.com/axelspringer/wp-programmatic-ad-sales",
-          "repoOwner": "Please choose a valid option! "
-        },
-        {
-          "repo": "wp-allfacebook-instant-articles",
-          "url": "https://github.com/axelspringer/wp-allfacebook-instant-articles",
-          "repoOwner": "Please choose a valid option! "
-        },
-        {
-          "repo": "wp-channelizer",
-          "url": "https://github.com/axelspringer/wp-channelizer",
-          "repoOwner": "Please choose a valid option! "
-        },
-        {
-          "repo": "confis",
-          "url": "https://github.com/axelspringer/confis",
-          "repoOwner": "Please choose a valid option! "
-        },
-        {
-          "repo": "ps-web-apis",
-          "url": "https://github.com/axelspringer/ps-web-apis",
-          "repoOwner": "Please choose a valid option! "
-        }
-      ],
-      "lastUpdated": "2026-03-06T00:44:11.723Z"
+      "totalRepos": 4,
+      "activeRepos": 4,
+      "inactiveRepos": 0,
+      "inactiveList": [],
+      "lastUpdated": "2026-03-06T09:12:48.789Z"
     },
     {
       "name": "Media-Impact",
@@ -1521,13 +1400,13 @@
       "activeRepos": 14,
       "inactiveRepos": 0,
       "inactiveList": [],
-      "lastUpdated": "2026-03-06T00:44:11.723Z"
+      "lastUpdated": "2026-03-06T09:12:48.789Z"
     },
     {
       "name": "spring-media",
-      "totalRepos": 1137,
+      "totalRepos": 1138,
       "activeRepos": 1106,
-      "inactiveRepos": 31,
+      "inactiveRepos": 32,
       "inactiveList": [
         {
           "repo": "DeepPhonemizer",
@@ -1683,9 +1562,14 @@
           "repo": "next-hey-adobe",
           "url": "https://github.com/spring-media/next-hey-adobe",
           "repoOwner": "Please choose a valid option!  "
+        },
+        {
+          "repo": "next-API-checker",
+          "url": "https://github.com/spring-media/next-API-checker",
+          "repoOwner": "Please choose a valid option!  "
         }
       ],
-      "lastUpdated": "2026-03-06T00:44:11.723Z"
+      "lastUpdated": "2026-03-06T09:12:48.789Z"
     },
     {
       "name": "welttv",
@@ -1934,7 +1818,7 @@
           "repoOwner": "Please choose a valid option!"
         }
       ],
-      "lastUpdated": "2026-03-06T00:44:11.723Z"
+      "lastUpdated": "2026-03-06T09:12:48.789Z"
     },
     {
       "name": "sales-impact",
@@ -1942,7 +1826,7 @@
       "activeRepos": 150,
       "inactiveRepos": 0,
       "inactiveList": [],
-      "lastUpdated": "2026-03-06T00:44:11.723Z"
+      "lastUpdated": "2026-03-06T09:12:48.789Z"
     }
   ],
   "trends": [
@@ -2403,6 +2287,25 @@
       "Media-Impact": 14,
       "Media-Impact_active": 14,
       "spring-media": 1137,
+      "spring-media_active": 1106,
+      "welttv": 48,
+      "welttv_active": 0,
+      "sales-impact": 150,
+      "sales-impact_active": 150
+    },
+    {
+      "date": "2026-03-06",
+      "AS-ASK-IT": 21,
+      "AS-ASK-IT_active": 21,
+      "as-cloud-services": 35,
+      "as-cloud-services_active": 35,
+      "asitservices": 772,
+      "asitservices_active": 500,
+      "axelspringer": 4,
+      "axelspringer_active": 4,
+      "Media-Impact": 14,
+      "Media-Impact_active": 14,
+      "spring-media": 1138,
       "spring-media_active": 1106,
       "welttv": 48,
       "welttv_active": 0,
